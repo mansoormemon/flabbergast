@@ -78,6 +78,3 @@ class SettingsMenu(arc_curts.BaseScene):
             )
 
             self._controls.append(opt)
-
-        # Data options.
-        self._data = arc.SpriteList(use_spatial_hash=True)
