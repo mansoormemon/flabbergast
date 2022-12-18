@@ -16,7 +16,7 @@ class Console(arc.SpriteList):
         self._scene = scene
         self._surface_level = surface_level
         self._register = {}
-        self._active_sprite = None
+        self._active_notification = None
 
     def add_notifier_text(self, text):
         text_sprite = arc.create_text_sprite(text,
@@ -30,21 +30,25 @@ class Console(arc.SpriteList):
 
         self.append(text_sprite)
 
+    def reset_active_notification(self):
+        self._active_notification = None
+
+    def is_notification_active(self):
+        return self._active_notification is not None
+
     def trigger_notification(self, scene, key):
-        if self._active_sprite is not None:
+        if self.is_notification_active():
             self.reset()
 
         text_sprite = self._register[key]
-        self._active_sprite = text_sprite
+        self._active_notification = text_sprite
         scene.animations.fire(text_sprite,
                               AnimationSequence.peek_from_bottom(text_sprite.center_x, self._surface_level,
                                                                  speed=Speed.FAST,
-                                                                 callback_func=(self.reset_active_sprite,)))
-
-    def reset_active_sprite(self):
-        self._active_sprite = None
+                                                                 callback_func=(self.reset_active_notification,)))
 
     def reset(self):
-        self._scene.animations.kill(self._active_sprite)
-        self._active_sprite.center_y = -self._surface_level
-        self.reset_active_sprite()
+        if self.is_notification_active():
+            self._scene.animations.kill(self._active_notification)
+            self._active_notification.center_y = -self._surface_level
+            self.reset_active_notification()
