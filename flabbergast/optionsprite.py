@@ -1,43 +1,44 @@
-import arcade as arc
+from enum import Enum
 
+import arcade as arc
 
 from flabbergast.assets import *
 from flabbergast.util import *
 
 
 class OptionSprite(arc.Sprite):
-    class Effects:
+    class TextureTypeList(Enum):
         DEFAULT = 0
-        PRESSED = 1
-
-        TOKENS = ["down"]
+        DOWN = 1
 
     class Scale:
         DEFAULT = 0.75
-        HOVER = 0.8
+        ON_HOVER = 0.8
 
-    V_PADDING = 96
-    H_PADDING = 196
+    class Volume:
+        RESPONSE_NOTE = 0.2
 
-    def __init__(self, name, *args, **kwargs):
+    def __init__(self, text, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.name = name
+        self._text = text
 
-        for effect in self.Effects.TOKENS:
-            self.textures.append(
-                arc.load_texture(assets(f"{TEXT_DIR}/{effect}/{self.name}.png"))
-            )
+        for texture in self.TextureTypeList:
+            texture_path = f"{TEXT_DIR}/{texture.name.lower()}/{text}.{FMT_IMAGE}"
+            self.textures.append(arc.load_texture(assets(texture_path)))
+
+        self.set_texture(self.TextureTypeList.DEFAULT.value)
+
+    def get_text(self):
+        return self._text
 
     class Callback:
         @staticmethod
         def hover(entity, *args):
-            RESPONSE_NOTE_VOLUME = 0.2
-
-            entity.scale = entity.Scale.HOVER
-            response_note = arc.Sound(assets(MUSIC_MOUSE_HOVER_RESPONSE))
-            note_player = response_note.play()
-            response_note.set_volume(RESPONSE_NOTE_VOLUME, note_player)
+            entity.scale = entity.Scale.ON_HOVER
+            note = arc.Sound(assets(AUDIO_MOUSE_HOVER_RESPONSE))
+            note_player = note.play()
+            note.set_volume(entity.Volume.RESPONSE_NOTE, note_player)
 
         @staticmethod
         def out(entity, *args):
@@ -45,12 +46,12 @@ class OptionSprite(arc.Sprite):
 
         @staticmethod
         def down(entity, *args):
-            entity.set_texture(entity.Effects.PRESSED)
+            entity.set_texture(entity.TextureTypeList.DOWN.value)
 
         @staticmethod
         def up(entity, *args):
-            entity.set_texture(entity.Effects.DEFAULT)
+            entity.set_texture(entity.TextureTypeList.DEFAULT.value)
 
         @staticmethod
-        def trigger_action(scene, entity, *args):
+        def trigger_click_action(scene, entity, *args):
             pass

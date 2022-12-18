@@ -1,9 +1,12 @@
 import arcade as arc
 
 from flabbergast.arithmetic import *
+from flabbergast.util import *
 
 
 class Metadata:
+    NAME_KEY = "Name"
+
     def __new__(cls):
         if not hasattr(cls, "instance"):
             cls.instance = super().__new__(cls)
@@ -11,6 +14,7 @@ class Metadata:
 
     def __init__(self):
         self.SCREEN_WIDTH, self.SCREEN_HEIGHT = arc.get_window().get_size()
+        self.player_name = get_data(self.NAME_KEY)
 
     @classmethod
     def load(cls):
@@ -34,12 +38,21 @@ class Metadata:
 
     @classmethod
     def hz_screen_center(cls):
-        return center(cls.screen_width())
+        return half(cls.screen_width())
 
     @classmethod
     def vt_screen_center(cls):
-        return center(cls.screen_height())
+        return half(cls.screen_height())
 
     @classmethod
     def screen_center(cls):
         return cls.hz_screen_center(), cls.vt_screen_center()
+
+    @classmethod
+    def get_player_name(cls):
+        return cls.instance.player_name
+
+    @classmethod
+    def set_player_name(cls, new_name):
+        cls.instance.player_name = new_name
+        update_data(cls.NAME_KEY, cls.instance.player_name)
