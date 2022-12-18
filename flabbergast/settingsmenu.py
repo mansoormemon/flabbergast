@@ -5,6 +5,7 @@ import arcade_curtains as arc_curts
 
 from flabbergast.animations import *
 from flabbergast.assets import *
+from flabbergast.console import *
 from flabbergast.metadata import *
 from flabbergast.optionsprite import *
 from flabbergast.scenes import *
@@ -32,12 +33,18 @@ class ControlOption(OptionSprite):
                     note = arc.Sound(assets(AUDIO_SAVE))
                     note_player = note.play()
                     note.set_volume(entity.Volume.RESPONSE_NOTE, note_player)
+                    scene.get_console().trigger_notification(scene,
+                                                             SettingsMenu.ConsoleNotificationList.SAVED.name.title())
 
 
 class SettingsMenu(NamedScene):
     class ControlOptionList(Enum):
         BACK = 0
         SAVE = 1
+
+    class ConsoleNotificationList(Enum):
+        SAVED = 0
+        BACK = 1
 
     SETTINGS_LABEL_Y_BOTTOM = 0.75
     CONTROL_OPTIONS_Y_BOTTOM = 0.25
@@ -49,6 +56,7 @@ class SettingsMenu(NamedScene):
         self._interactive_elements = None
         self._lbl_settings = None
         self._control_opts = None
+        self._console = None
 
         super().__init__(Scene.SETTINGS, *args, **kwargs)
 
@@ -85,6 +93,13 @@ class SettingsMenu(NamedScene):
 
             self._control_opts.append(opt)
 
+        self._console = Console(self, use_spatial_hash=True)
+        for notification in self.ConsoleNotificationList:
+            self._console.add_notifier_text(notification.name.title())
+
+    def get_console(self):
+        return self._console
+
     def draw(self):
         # Draw background.
         self._background.draw_scaled(Metadata.hz_screen_center(), Metadata.vt_screen_center())
@@ -94,3 +109,6 @@ class SettingsMenu(NamedScene):
 
         # Draw sprite lists.
         super().draw()
+
+    def leave_scene(self, next_scene):
+        self._console.reset()

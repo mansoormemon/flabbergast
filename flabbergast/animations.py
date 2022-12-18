@@ -78,3 +78,19 @@ class AnimationSequence:
             func, *args = callback_func
             sequence.add_callback(sequence.total_time, lambda: func(*args))
         return sequence
+
+    @staticmethod
+    def peek_from_bottom(x, surface_level, speed=Speed.DEFAULT, callback_func=None):
+        sequence = arc_curts.Sequence()
+        frames = [
+            arc_curts.KeyFrame(position=(x, -surface_level)),
+            arc_curts.KeyFrame(position=(x, surface_level)),
+            arc_curts.KeyFrame(position=(x, surface_level)),
+            arc_curts.KeyFrame(position=(x, -surface_level))
+        ]
+        for n, frame in enumerate(frames):
+            sequence.add_keyframe(n * speed, frame)
+        if callback_func is not None:
+            func, *args = callback_func
+            sequence.add_callback(sequence.total_time, lambda: func(*args))
+        return sequence

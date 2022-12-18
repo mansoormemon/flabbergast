@@ -46,10 +46,10 @@ class Maze:
         @staticmethod
         def generate(grid_shape, seed=0):
             def neighbor(r, c, direction):
-                return (r + Direction.DY[direction], c + Direction.DX[direction])
+                return r + Direction.DY[direction], c + Direction.DX[direction]
 
             def compute_maze_shape(rows, cols):
-                return (rows * 2 + 1, cols * 2 + 1)
+                return rows * 2 + 1, cols * 2 + 1
 
             np.random.seed(seed)
 
@@ -81,7 +81,7 @@ class Maze:
                 max_x = max(a_r, b_r) * 2 + 1
                 min_y = min(a_c, b_c) * 2 + 1
                 max_y = max(a_c, b_c) * 2 + 1
-                maze_map[min_x : max_x + 1, min_y : max_y + 1] = 1
+                maze_map[min_x: max_x + 1, min_y: max_y + 1] = 1
 
             return maze_map
 
