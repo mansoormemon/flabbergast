@@ -1,6 +1,28 @@
 import arcade_curtains as arc_curts
 
 
+class Alpha:
+    INVISIBLE = 0
+    VISIBLE = 255
+
+
+class Delay:
+    VERY_SHORT = 0.5
+    SHORT = 1
+    MEDIUM = 2
+    LONG = 3
+    VERY_LONG = 4
+
+
+class Scale:
+    DELTA = 0.05
+    ONE_HALF = 0.5
+    UNITY = 1.0
+    THREE_HAVLES = 1.5
+    TWICE = 2.0
+    THRICE = 3.0
+
+
 class Speed:
     VERY_FAST = 0.5
     FAST = 1
@@ -9,88 +31,71 @@ class Speed:
     VERY_SLOW = 4
 
 
-class Scale:
-    ONE_HALF = 0.5
-    UNITY = 1.0
-    THREE_HAVLES = 1.5
-    TWICE = 2.0
-
-
-class Alpha:
-    INVISIBLE = 0
-    VISIBLE = 255
-
-
 class Animation:
-    DEFAULT_DELTA_INFLATE = 0.05
-    DEFAULT_DELTA_DEFLATE = 0.05
+    @staticmethod
+    def animationsequence(frame_sequence):
+        def impl(*args, speed=Speed.DEFAULT, callback=None):
+            time_frames = frame_sequence(*args)
+            sequence = arc_curts.Sequence()
+            point_in_time = 0
+            for key_frame, span in time_frames:
+                sequence.add_keyframe(point_in_time, key_frame)
+                if span:
+                    point_in_time += span * speed
+            if callback is not None:
+                func, *args = callback
+                sequence.add_callback(sequence.total_time, lambda: func(*args))
+            return sequence
+
+        return impl
 
     @staticmethod
-    def inflate(entity, *args, speed=Speed.FAST, delta=DEFAULT_DELTA_INFLATE):
-        entity.animate(duration=speed, scale=entity.scale + delta)
-
-    @staticmethod
-    def deflate(entity, *args, speed=Speed.FAST, delta=DEFAULT_DELTA_DEFLATE):
-        entity.animate(duration=speed, scale=entity.scale - delta)
-
-
-class AnimationSequence:
-    @staticmethod
-    def fade_in(speed=Speed.DEFAULT, callback_func=None):
-        sequence = arc_curts.Sequence()
-        frames = [
-            arc_curts.KeyFrame(alpha=Alpha.INVISIBLE),
-            arc_curts.KeyFrame(alpha=Alpha.VISIBLE),
+    @animationsequence
+    def fade_in():
+        return [
+            (arc_curts.KeyFrame(alpha=Alpha.INVISIBLE), Delay.SHORT),
+            (arc_curts.KeyFrame(alpha=Alpha.VISIBLE), None),
         ]
-        for n, frame in enumerate(frames):
-            sequence.add_keyframe(n * speed, frame)
-
-        if callback_func is not None:
-            func, *args = callback_func
-            sequence.add_callback(sequence.total_time, lambda: func(*args))
-        return sequence
 
     @staticmethod
-    def fade_in_with_pause(speed=Speed.DEFAULT, callback_func=None):
-        sequence = arc_curts.Sequence()
-        frames = [
-            arc_curts.KeyFrame(alpha=Alpha.INVISIBLE),
-            arc_curts.KeyFrame(alpha=Alpha.INVISIBLE),
-            arc_curts.KeyFrame(alpha=Alpha.VISIBLE),
+    @animationsequence
+    def fade_in_with_pause():
+        return [
+            (arc_curts.KeyFrame(alpha=Alpha.INVISIBLE), Delay.SHORT),
+            (arc_curts.KeyFrame(alpha=Alpha.INVISIBLE), Delay.VERY_SHORT),
+            (arc_curts.KeyFrame(alpha=Alpha.VISIBLE), None),
         ]
-        for n, frame in enumerate(frames):
-            sequence.add_keyframe(n * speed, frame)
-        if callback_func is not None:
-            func, *args = callback_func
-            sequence.add_callback(sequence.total_time, lambda: func(*args))
-        return sequence
 
     @staticmethod
-    def inflate(begin_scale=Scale.ONE_HALF, end_scale=Scale.UNITY, speed=Speed.DEFAULT, callback_func=None):
-        sequence = arc_curts.Sequence()
-        frames = [
-            arc_curts.KeyFrame(scale=begin_scale),
-            arc_curts.KeyFrame(scale=end_scale),
+    @animationsequence
+    def inflate(begin_scale=Scale.UNITY, end_scale=Scale.UNITY + Scale.DELTA):
+        return [
+            (arc_curts.KeyFrame(scale=begin_scale), Delay.SHORT),
+            (arc_curts.KeyFrame(scale=end_scale), None),
         ]
-        for n, frame in enumerate(frames):
-            sequence.add_keyframe(n * speed, frame)
-        if callback_func is not None:
-            func, *args = callback_func
-            sequence.add_callback(sequence.total_time, lambda: func(*args))
-        return sequence
 
     @staticmethod
-    def peek_from_bottom(x, surface_level, speed=Speed.DEFAULT, callback_func=None):
-        sequence = arc_curts.Sequence()
-        frames = [
-            arc_curts.KeyFrame(position=(x, -surface_level)),
-            arc_curts.KeyFrame(position=(x, surface_level)),
-            arc_curts.KeyFrame(position=(x, surface_level)),
-            arc_curts.KeyFrame(position=(x, -surface_level))
+    @animationsequence
+    def deflate(begin_scale=Scale.UNITY + Scale.DELTA, end_scale=Scale.UNITY):
+        return [
+            (arc_curts.KeyFrame(scale=begin_scale), Delay.SHORT),
+            (arc_curts.KeyFrame(scale=end_scale), None),
         ]
-        for n, frame in enumerate(frames):
-            sequence.add_keyframe(n * speed, frame)
-        if callback_func is not None:
-            func, *args = callback_func
-            sequence.add_callback(sequence.total_time, lambda: func(*args))
-        return sequence
+
+    @staticmethod
+    @animationsequence
+    def peek_from_bottom(x, y):
+        return [
+            (arc_curts.KeyFrame(position=(x, -y)), Delay.VERY_SHORT),
+            (arc_curts.KeyFrame(position=(x, y)), Delay.MEDIUM),
+            (arc_curts.KeyFrame(position=(x, y)), Delay.VERY_SHORT),
+            (arc_curts.KeyFrame(position=(x, -y)), None)
+        ]
+
+    @staticmethod
+    @animationsequence
+    def rotate():
+        return [
+            (arc_curts.KeyFrame(angle=0), Delay.VERY_SHORT),
+            (arc_curts.KeyFrame(angle=360), None)
+        ]

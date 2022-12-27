@@ -3,10 +3,9 @@ from enum import Enum
 import arcade as arc
 
 from flabbergast.assets import *
-from flabbergast.util import *
 
 
-class OptionSprite(arc.Sprite):
+class Option(arc.Sprite):
     class TextureTypeList(Enum):
         DEFAULT = 0
         DOWN = 1
@@ -16,7 +15,7 @@ class OptionSprite(arc.Sprite):
         ON_HOVER = 0.8
 
     class Volume:
-        RESPONSE_NOTE = 0.2
+        RESPONSE_NOTE = 0.6
 
     def __init__(self, text, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -24,13 +23,15 @@ class OptionSprite(arc.Sprite):
         self._text = text
 
         for texture in self.TextureTypeList:
-            texture_path = f"{TEXT_DIR}/{texture.name.lower()}/{text}.{FMT_IMAGE}"
+            texture_path = self.make_texture_path(texture)
             self.textures.append(arc.load_texture(assets(texture_path)))
-
         self.set_texture(self.TextureTypeList.DEFAULT.value)
 
     def get_text(self):
         return self._text
+
+    def make_texture_path(self, texture):
+        return f"{DIR_TEXT}/{texture.name.lower()}/{self._text}.{FMT_IMAGE}"
 
     class Callback:
         @staticmethod
@@ -53,5 +54,5 @@ class OptionSprite(arc.Sprite):
             entity.set_texture(entity.TextureTypeList.DEFAULT.value)
 
         @staticmethod
-        def trigger_click_action(scene, entity, *args):
+        def trigger_click_action(context, entity, *args):
             pass

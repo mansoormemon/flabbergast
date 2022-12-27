@@ -1,14 +1,18 @@
 import arcade as arc
 
-from flabbergast.animations import *
 from flabbergast.assets import *
-from flabbergast.metadata import *
-from flabbergast.util import *
+
+from flabbergast import animations
+from flabbergast import dataproxy
 
 
-class Console(arc.SpriteList):
+class MessageConsole(arc.SpriteList):
     class Level:
         SURFACE = 48
+
+    FONT_COLOR = arc.color.WHITE_SMOKE
+    FONT_SIZE = 20
+    FONT_PATH = assets(FONT_TEKTON)
 
     def __init__(self, scene, surface_level=Level.SURFACE, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -20,15 +24,14 @@ class Console(arc.SpriteList):
 
     def add_notifier_text(self, text):
         text_sprite = arc.create_text_sprite(text,
-                                             0, 0,
-                                             arc.color.WHITE_SMOKE,
-                                             font_name=assets(FONT_TEKTON))
-        text_sprite.center_x = Metadata.hz_screen_center()
-        text_sprite.center_y = -self._surface_level
+                                             dataproxy.Meta.hz_screen_center(),
+                                             -self._surface_level,
+                                             self.FONT_COLOR,
+                                             font_name=self.FONT_PATH, font_size=self.FONT_SIZE,
+                                             anchor_x="center", anchor_y="center")
+        self.append(text_sprite)
 
         self._register[text] = text_sprite
-
-        self.append(text_sprite)
 
     def reset_active_notification(self):
         self._active_notification = None
@@ -43,9 +46,9 @@ class Console(arc.SpriteList):
         text_sprite = self._register[key]
         self._active_notification = text_sprite
         scene.animations.fire(text_sprite,
-                              AnimationSequence.peek_from_bottom(text_sprite.center_x, self._surface_level,
-                                                                 speed=Speed.FAST,
-                                                                 callback_func=(self.reset_active_notification,)))
+                              animations.Animation.peek_from_bottom(text_sprite.center_x, self._surface_level,
+                                                                    speed=animations.Speed.FAST,
+                                                                    callback=(self.reset_active_notification,)))
 
     def reset(self):
         if self.is_notification_active():
