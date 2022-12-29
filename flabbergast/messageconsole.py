@@ -10,9 +10,10 @@ class MessageConsole(arc.SpriteList):
     class Level:
         SURFACE = 48
 
-    FONT_COLOR = arc.color.WHITE_SMOKE
-    FONT_SIZE = 20
-    FONT_PATH = assets(FONT_TEKTON)
+    class Font:
+        COLOR = arc.color.WHITE_SMOKE
+        PATH = assets(FONT_TEKTON)
+        SIZE = 20
 
     def __init__(self, scene, surface_level=Level.SURFACE, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -26,8 +27,8 @@ class MessageConsole(arc.SpriteList):
         text_sprite = arc.create_text_sprite(text,
                                              dataproxy.Meta.hz_screen_center(),
                                              -self._surface_level,
-                                             self.FONT_COLOR,
-                                             font_name=self.FONT_PATH, font_size=self.FONT_SIZE,
+                                             self.Font.COLOR,
+                                             font_name=self.Font.PATH, font_size=self.Font.SIZE,
                                              anchor_x="center", anchor_y="center")
         self.append(text_sprite)
 

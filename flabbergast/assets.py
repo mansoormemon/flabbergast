@@ -18,7 +18,7 @@ FMT_FONT = "ttf"
 DIR_AUDIO = "audio"
 DIR_BACKGROUNDS = "backgrounds"
 DIR_FONTS = "fonts"
-DIR_FRAMES = "frames"
+DIR_ICONS = "icons"
 DIR_LOGOS = "logos"
 DIR_MASCOTS = "mascots"
 DIR_TEAMS = "teams"
@@ -27,8 +27,8 @@ DIR_TEXTURES = "textures"
 DIR_WIDGETS = "widgets"
 
 AUDIO_BACKGROUND_MAINMENU = f"{DIR_AUDIO}/wondrouswaters.{FMT_AUDIO}"
-AUDIO_LONGPOP = f"{DIR_AUDIO}/longpop.{FMT_AUDIO}"
 AUDIO_MOUSE_HOVER_RESPONSE = f"{DIR_AUDIO}/positiveinterfacehover.{FMT_AUDIO}"
+AUDIO_POP = f"{DIR_AUDIO}/pop.{FMT_AUDIO}"
 AUDIO_SAVE = f"{DIR_AUDIO}/positiveinterfacebeep.{FMT_AUDIO}"
 
 BACKGROUND_MAINMENU = f"{DIR_BACKGROUNDS}/mainmenu.{FMT_IMAGE}"
@@ -36,6 +36,9 @@ BACKGROUND_PANE = f"{DIR_BACKGROUNDS}/pane.{FMT_IMAGE}"
 BACKGROUND_SETTINGS = f"{DIR_BACKGROUNDS}/settings.{FMT_IMAGE}"
 
 FONT_TEKTON = f"{DIR_FONTS}/tekton.{FMT_FONT}"
+
+ICON_DEFAULT_EDITPENCIL = f"{DIR_ICONS}/default/editpencil.{FMT_IMAGE}"
+ICON_DOWN_EDITPENCIL = f"{DIR_ICONS}/down/editpencil.{FMT_IMAGE}"
 
 LOGO_CORP = f"{DIR_LOGOS}/corporation.{FMT_IMAGE}"
 LOGO_GAME = f"{DIR_LOGOS}/game.{FMT_IMAGE}"
@@ -66,5 +69,14 @@ TEXT_DOWN_STORYMODE = f"{DIR_TEXT}/down/storymode.{FMT_IMAGE}"
 
 TEXTURES_FLOORGARDEN = f"{DIR_TEXTURES}/floorgarden.{FMT_IMAGE}"
 
+WGT_DEFAULT_ARROWDOWN = f"{DIR_WIDGETS}/default/arrowdown.{FMT_IMAGE}"
+WGT_DEFAULT_ARROWLEFT = f"{DIR_WIDGETS}/default/arrowleft.{FMT_IMAGE}"
+WGT_DEFAULT_ARROWRIGHT = f"{DIR_WIDGETS}/default/arrowright.{FMT_IMAGE}"
+WGT_DEFAULT_ARROWUP = f"{DIR_WIDGETS}/default/arrowup.{FMT_IMAGE}"
 WGT_DEFAULT_INPUTBOX = f"{DIR_WIDGETS}/default/inputbox.{FMT_IMAGE}"
+
+WGT_DOWN_ARROWDOWN = f"{DIR_WIDGETS}/down/arrowdown.{FMT_IMAGE}"
+WGT_DOWN_ARROWLEFT = f"{DIR_WIDGETS}/down/arrowleft.{FMT_IMAGE}"
+WGT_DOWN_ARROWRIGHT = f"{DIR_WIDGETS}/down/arrowright.{FMT_IMAGE}"
+WGT_DOWN_ARROWUP = f"{DIR_WIDGETS}/down/arrowup.{FMT_IMAGE}"
 WGT_DOWN_INPUTBOX = f"{DIR_WIDGETS}/down/inputbox.{FMT_IMAGE}"

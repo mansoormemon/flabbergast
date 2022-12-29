@@ -4,90 +4,77 @@ import arcade as arc
 
 from flabbergast.assets import *
 
+from flabbergast import dataproxy
+from flabbergast import options
+
 
 class Reference(Enum):
     FIESTYLION = 0
     LONEWOLF = 1
 
 
-class AvatarMascot(arc.SpriteList):
-    IMAGE_FILE_NAME = "mascotring"
-
-    class TextureTypeList(Enum):
-        DEFAULT = 0
-        DOWN = 1
-
+class MascotRing(options.ImageOption):
     class Scale:
-        DELTA = 0.02
-        DEFAULT = 0.44
-        ON_HOVER = 0.448
+        DEFAULT = 0.42
+        ON_HOVER = 0.44
+
+    class Response(options.ImageOption.Response):
+        NOTE = AUDIO_POP
+        VOLUME = 0.1
+
+
+class AvatarMascot(arc.SpriteList):
+    class Scale(MascotRing.Scale):
+        DELTA = 0.04
 
     class Volume:
         RESPONSE_NOTE = 0.1
 
-    def __init__(self, reference, center_x, center_y, *args, **kwargs):
+    class Step:
+        BACK = -1
+        FORWARD = 1
+
+    def __init__(self, center_x, center_y, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._reference = reference
+        self._current_reference = dataproxy.User.get_team()
 
-        self._avatar_texture = arc.load_texture(assets(self.get_mascot_path()))
+        self._avatars = {}
+        for mascot in Reference:
+            texture_path = f"{DIR_TEAMS}/{mascot.name.lower()}/mascot.{FMT_IMAGE}"
+            self._avatars[mascot.name.lower()] = arc.load_texture(assets(texture_path))
 
-        self._ring = arc.Sprite(scale=self.Scale.DEFAULT, center_x=center_x, center_y=center_y)
-        for texture in self.TextureTypeList:
-            texture_path = self.make_texture_path(texture)
-            self._ring.textures.append(arc.load_texture(assets(texture_path)))
-        self._ring.set_texture(self.TextureTypeList.DEFAULT.value)
+        self._ring = MascotRing([TEAM_SHARED_DEFAULT_MASCOTRING, TEAM_SHARED_DOWN_MASCOTRING],
+                                center_x=center_x,
+                                center_y=center_y,
+                                scale=self.Scale.DEFAULT)
         self.append(self._ring)
 
-    def get_reference(self):
-        return self._reference
-
-    def get_reference_name(self):
-        return self._reference.name.lower()
+        self._previous_state = None
 
     def get_ring(self):
         return self._ring
 
-    def make_texture_path(self, texture):
-        return f"{DIR_TEAMS}/shared/{texture.name.lower()}/{self.IMAGE_FILE_NAME}.{FMT_IMAGE}"
+    def reset_state(self):
+        self._previous_state = None
 
-    def get_mascot_path(self):
-        match self._reference:
-            case Reference.FIESTYLION:
-                return TEAM_FIESTYLION_MASCOT
-            case Reference.LONEWOLF:
-                return TEAM_LONEWOLF_MASCOT
+    def revert_if_unsaved(self):
+        if self._previous_state:
+            self._current_reference = self._previous_state
+
+    def get_current_reference(self):
+        return self._current_reference
 
     def draw(self, *, filter_=None, pixelated=None, blend_function=None):
-        self._avatar_texture.draw_scaled(self._ring.center_x, self._ring.center_y,
-                                         scale=self.Scale.DEFAULT - self.Scale.DELTA)
+        self._avatars[self._current_reference].draw_scaled(self._ring.center_x, self._ring.center_y,
+                                                           scale=self.Scale.DEFAULT - self.Scale.DELTA)
 
         super().draw(filter=filter_, pixelated=pixelated, blend_function=blend_function)
 
-    class Callback:
-        @staticmethod
-        def hover(entity, *args):
-            sprite_list, *residue = entity.sprite_lists
-            entity.scale = sprite_list.Scale.ON_HOVER
-            note = arc.Sound(assets(AUDIO_LONGPOP))
-            note_player = note.play()
-            note.set_volume(sprite_list.Volume.RESPONSE_NOTE, note_player)
+    def change_avatar(self, step):
+        if not self._previous_state:
+            self._previous_state = self._current_reference
 
-        @staticmethod
-        def out(entity, *args):
-            sprite_list, *residue = entity.sprite_lists
-            entity.scale = sprite_list.Scale.DEFAULT
-
-        @staticmethod
-        def down(entity, *args):
-            sprite_list, *residue = entity.sprite_lists
-            entity.set_texture(sprite_list.TextureTypeList.DOWN.value)
-
-        @staticmethod
-        def up(entity, *args):
-            sprite_list, *residue = entity.sprite_lists
-            entity.set_texture(sprite_list.TextureTypeList.DEFAULT.value)
-
-        @staticmethod
-        def trigger_click_action(context, entity, *args):
-            pass
+        reference_index = (Reference[self._current_reference.upper()].value + step) % len(Reference)
+        reference_list = list(Reference)
+        self._current_reference = reference_list[reference_index].name.lower()

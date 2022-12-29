@@ -8,16 +8,16 @@ from flabbergast.assets import *
 from flabbergast import animations
 from flabbergast import curtainscene
 from flabbergast import dataproxy
-from flabbergast import option
+from flabbergast import options
 
 
-class MenuOption(option.Option):
+class MenuOption(options.TextOption):
     HEIGHT = 96
 
     def __init__(self, text, *args, **kwargs):
-        super().__init__(text, *args, **kwargs)
+        super().__init__(text, *args, scale=self.Scale.DEFAULT, **kwargs)
 
-    class Callback(option.Option.Callback):
+    class Callback(options.TextOption.Callback):
         @staticmethod
         def trigger_click_action(context, entity, *args):
             selected_option = Scene.OptionList[entity.get_text().upper()]
@@ -95,7 +95,7 @@ class Scene(curtainscene.AbstractScene):
                              center_y=(dataproxy.Meta.vt_screen_center()
                                        - (n * MenuOption.HEIGHT)
                                        + (dataproxy.Meta.screen_height() * self.MENU_OPTIONS_Y_CENTER)),
-                             scale=MenuOption.Scale.DEFAULT)
+                             )
             opt.alpha = animations.Alpha.INVISIBLE
             self._menu_opts.append(opt)
 
@@ -115,12 +115,12 @@ class Scene(curtainscene.AbstractScene):
         super().draw()
 
     def connect_menu_option_events(self, entity):
-        self.events.hover(entity, MenuOption.Callback.hover)
-        self.events.out(entity, MenuOption.Callback.out)
-        self.events.down(entity, MenuOption.Callback.down)
-        self.events.up(entity, MenuOption.Callback.up)
+        self.events.hover(entity, entity.Callback.hover)
+        self.events.out(entity, entity.Callback.out)
+        self.events.down(entity, entity.Callback.down)
+        self.events.up(entity, entity.Callback.up)
         self.events.click(entity,
-                          lambda *args: MenuOption.Callback.trigger_click_action(self, *args))
+                          lambda *args: entity.Callback.trigger_click_action(self, *args))
 
     def enter_scene(self, previous_scene):
         # Fire logo animation on first visit.
