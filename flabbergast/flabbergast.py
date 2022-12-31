@@ -1,11 +1,11 @@
 import arcade as arc
 import arcade_curtains as arc_curts
 
-from flabbergast import curtainscene
-from flabbergast import dataproxy
-from flabbergast import mainmenu
-from flabbergast import platformer
-from flabbergast import settingspane
+from .dataproxy import Configuration, Meta, User
+from .mainmenu import MainMenu
+from .platformer import Platformer
+from .references import SceneList
+from .settingspane import SettingsPane
 
 
 class Flabbergast(arc.Window):
@@ -22,27 +22,27 @@ class Flabbergast(arc.Window):
         self._curtains = arc_curts.Curtains(self)
         self._curtains.add_scenes(
             {
-                curtainscene.Reference.MAINMENU: mainmenu.Scene(),
-                curtainscene.Reference.PLATFORMER: platformer.Scene(),
-                curtainscene.Reference.SETTINGSPANE: settingspane.Scene()
+                SceneList.MAINMENU: MainMenu(),
+                SceneList.PLATFORMER: Platformer(),
+                SceneList.SETTINGSPANE: SettingsPane()
             }
         )
 
     def load_n_apply_configurations(self):
-        dataproxy.Configuration.load()
-        self.set_caption(dataproxy.Configuration.screen_title())
-        self.set_fullscreen(dataproxy.Configuration.fullscreen())
+        Configuration()
+        self.set_caption(Configuration.screen_title())
+        self.set_fullscreen(Configuration.fullscreen())
 
     @staticmethod
     def load_metadata():
-        dataproxy.Meta.load()
+        Meta()
 
     @staticmethod
     def load_userdata():
-        dataproxy.User.load()
+        User()
 
     def setup(self):
-        self._curtains.set_scene(curtainscene.Reference.MAINMENU)
+        self._curtains.set_scene(SceneList.MAINMENU)
 
     def launch(self):
         self.setup()

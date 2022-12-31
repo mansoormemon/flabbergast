@@ -1,1 +1,1 @@
-from .flabbergast import *
+from .flabbergast import Flabbergast

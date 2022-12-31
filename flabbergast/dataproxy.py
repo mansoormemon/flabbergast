@@ -1,29 +1,51 @@
 from abc import ABC
 from enum import Enum
+from pathlib import Path
 
 import arcade as arc
 import json
 
-from flabbergast import mathematics
-from flabbergast import util
+from .core import vmath
+
+_project_root = Path(__file__).parent.parent.resolve()
+
+
+class AtomicData:
+    def __init__(self, token):
+        self._data = token
+        self._previous_state = None
+
+    @property
+    def data(self):
+        return self._data
+
+    @data.setter
+    def data(self, token):
+        if not self._previous_state:
+            self._previous_state = self._data
+        self._data = token
+
+    def flush(self):
+        self._previous_state = None
+
+    def stabilize(self):
+        if self._previous_state:
+            self._data = self._previous_state
+            self.flush()
 
 
 class SingletonData(ABC):
-    instance = None
+    _instance = None
 
     @staticmethod
     def __new__(cls, *args, **kwargs):
-        if cls.instance is None:
-            cls.instance = super().__new__(cls)
-            return cls.instance
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            return cls._instance
 
     @classmethod
-    def load(cls):
-        cls()
-
-    @classmethod
-    def get(cls):
-        return cls.instance
+    def instance(cls):
+        return cls._instance
 
 
 class Configuration(SingletonData):
@@ -39,24 +61,21 @@ class Configuration(SingletonData):
 
     @classmethod
     def get_config_file(cls):
-        return util.get_project_root().joinpath(cls.FILE)
+        return _project_root.joinpath(cls.FILE)
 
     @classmethod
     def get_config(cls, key, rtype=str):
-        if isinstance(key, Enum):
-            key = key.name.lower()
-
         with open(cls.get_config_file()) as file:
             cfg = json.load(file)
-            return rtype(cfg[key])
+            return rtype(cfg[key.name.lower()])
 
     @classmethod
     def screen_title(cls):
-        return cls.instance.SCREEN_TITLE
+        return cls.instance().SCREEN_TITLE
 
     @classmethod
     def fullscreen(cls):
-        return cls.instance.FULLSCREEN
+        return cls.instance().FULLSCREEN
 
 
 class Meta(SingletonData):
@@ -65,11 +84,11 @@ class Meta(SingletonData):
 
     @classmethod
     def screen_width(cls):
-        return cls.instance.SCREEN_WIDTH
+        return cls.instance().SCREEN_WIDTH
 
     @classmethod
     def screen_height(cls):
-        return cls.instance.SCREEN_HEIGHT
+        return cls.instance().SCREEN_HEIGHT
 
     @classmethod
     def screen_size(cls):
@@ -77,11 +96,11 @@ class Meta(SingletonData):
 
     @classmethod
     def hz_screen_center(cls):
-        return mathematics.half(cls.screen_width())
+        return vmath.half(cls.screen_width())
 
     @classmethod
     def vt_screen_center(cls):
-        return mathematics.half(cls.screen_height())
+        return vmath.half(cls.screen_height())
 
     @classmethod
     def screen_center(cls):
@@ -101,42 +120,36 @@ class User(SingletonData):
 
     @classmethod
     def get_file(cls):
-        return util.get_project_root().joinpath(cls.FILE)
+        return _project_root.joinpath(cls.FILE)
 
     @classmethod
     def get_data(cls, key, rtype=str):
-        if isinstance(key, Enum):
-            key = key.name.lower()
-
         with open(cls.get_file()) as file:
             data = json.load(file)
-            return rtype(data[key])
+            return rtype(data[key.name.lower()])
 
     @classmethod
     def get_name(cls, alphanumeric_only=True):
-        return str().join(
-            filter(lambda c: c.isalnum() or c.isspace(), cls.instance.name)
-        ) if alphanumeric_only else cls.instance.name
+        return str().join(filter(lambda c: c.isalnum() or c.isspace(),
+                                 cls.instance().name)) if alphanumeric_only else cls.instance().name
 
     @classmethod
     def set_name(cls, new_name):
-        cls.instance.name = new_name
+        cls.instance().name = new_name
 
     @classmethod
     def get_team(cls):
-        return cls.instance.team
+        return cls.instance().team
 
     @classmethod
     def set_team(cls, new_team):
-        if isinstance(new_team, Enum):
-            new_team = new_team.name.lower()
-        cls.instance.team = new_team
+        cls.instance().team = new_team
 
     @classmethod
     def save(cls):
         JSON_INDENT_LEVEL = 4
 
-        data = cls.instance.__dict__
+        data = cls.instance().__dict__
         json_data = json.dumps(data, indent=JSON_INDENT_LEVEL)
         with open(cls.get_file(), "w") as file:
             file.write(f"{json_data}\n")

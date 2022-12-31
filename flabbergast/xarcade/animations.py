@@ -59,7 +59,7 @@ class Animation:
 
     @staticmethod
     @animationsequence
-    def fade_in_with_pause():
+    def fade_in_with_delay():
         return [
             (arc_curts.KeyFrame(alpha=Alpha.INVISIBLE), Delay.SHORT),
             (arc_curts.KeyFrame(alpha=Alpha.INVISIBLE), Delay.VERY_SHORT),
@@ -90,12 +90,4 @@ class Animation:
             (arc_curts.KeyFrame(position=(x, y)), Delay.MEDIUM),
             (arc_curts.KeyFrame(position=(x, y)), Delay.VERY_SHORT),
             (arc_curts.KeyFrame(position=(x, -y)), None)
-        ]
-
-    @staticmethod
-    @animationsequence
-    def rotate():
-        return [
-            (arc_curts.KeyFrame(angle=0), Delay.VERY_SHORT),
-            (arc_curts.KeyFrame(angle=360), None)
         ]

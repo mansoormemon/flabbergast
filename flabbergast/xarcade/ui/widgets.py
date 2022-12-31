@@ -3,20 +3,19 @@ from enum import Enum
 import arcade as arc
 import arcade.gui as arc_gui
 
-from flabbergast.assets import *
+from flabbergast.assets import asset
 
-from flabbergast import mathematics
-from flabbergast import dataproxy
-from flabbergast import options
+from flabbergast.assets import (
+    FONT_TEKTON,
+    ICON_DEFAULT_EDITPENCIL,
+    ICON_DOWN_EDITPENCIL,
+    WGT_DEFAULT_INPUTBOX,
+    WGT_DOWN_INPUTBOX
+)
 
-
-class TooltipOption(options.ImageOption):
-    class Scale:
-        DEFAULT = 0.44
-        ON_HOVER = 0.48
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, scale=self.Scale.DEFAULT, **kwargs)
+from flabbergast.core import vmath
+from flabbergast.dataproxy import AtomicData, Meta, User
+from ..options import TooltipOption
 
 
 class InputBox(arc_gui.UIInputText):
@@ -31,7 +30,7 @@ class InputBox(arc_gui.UIInputText):
     class Font:
         COLOR = arc.color.WINE_DREGS
         NAME = "Tekton Display Ssi"
-        PATH = assets(FONT_TEKTON)
+        PATH = asset(FONT_TEKTON)
         SIZE = 22
 
     EDIT_BUTTON_X_CENTER_X = 0.36
@@ -53,8 +52,8 @@ class InputBox(arc_gui.UIInputText):
         self._background = arc.Sprite(center_x=self._center_x,
                                       center_y=self._center_y,
                                       scale=self.Scale.DEFAULT)
-        self._background.textures = [arc.load_texture(assets(WGT_DEFAULT_INPUTBOX)),
-                                     arc.load_texture(assets(WGT_DOWN_INPUTBOX))]
+        self._background.textures = [arc.load_texture(asset(WGT_DEFAULT_INPUTBOX)),
+                                     arc.load_texture(asset(WGT_DOWN_INPUTBOX))]
         self._background.set_texture(self.TextureTypeList.DEFAULT.value)
         self._widget_list.append(self._background)
 
@@ -71,9 +70,9 @@ class InputBox(arc_gui.UIInputText):
 
         width = self._background.width * (self.Scale.DEFAULT + self.Scale.DELTA)
         height = self._background.height * (self.Scale.DEFAULT + self.Scale.DELTA)
-        x = center_x - mathematics.half(width) - self.BOX_OFFSET
-        y = center_y - mathematics.half(height) - self.BOX_OFFSET
-        super().__init__(text=dataproxy.User.get_name(),
+        x = center_x - vmath.half(width) - self.BOX_OFFSET
+        y = center_y - vmath.half(height) - self.BOX_OFFSET
+        super().__init__(text=User.get_name(),
                          x=x,
                          y=y,
                          width=width,
@@ -85,7 +84,7 @@ class InputBox(arc_gui.UIInputText):
         self._previous_active_state = False
         self._previous_text = self.text
 
-        self._previous_state = None
+        self._previous_state = False
 
     def on_update(self, dt):
         super().on_update(dt)
@@ -116,10 +115,10 @@ class InputBox(arc_gui.UIInputText):
         self._edit_button.visible = True
         self._background.set_texture(self.TextureTypeList.DEFAULT.value)
 
-    def reset_state(self):
+    def flush(self):
         self._previous_state = None
 
-    def revert_if_unsaved(self):
+    def stabilize(self):
         if self._previous_state:
             self.doc.text = self._previous_state
             self.trigger_full_render()

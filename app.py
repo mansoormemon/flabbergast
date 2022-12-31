@@ -1,4 +1,5 @@
 from flabbergast import Flabbergast
 
-game = Flabbergast()
-game.launch()
+if __name__ == "__main__":
+    game = Flabbergast()
+    game.launch()

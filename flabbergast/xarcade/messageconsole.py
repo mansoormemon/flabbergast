@@ -1,9 +1,13 @@
 import arcade as arc
 
-from flabbergast.assets import *
+from flabbergast.assets import asset
 
-from flabbergast import animations
-from flabbergast import dataproxy
+from flabbergast.assets import (
+    FONT_TEKTON
+)
+
+from .. import xarcade as xarc
+from ..dataproxy import Meta
 
 
 class MessageConsole(arc.SpriteList):
@@ -12,7 +16,7 @@ class MessageConsole(arc.SpriteList):
 
     class Font:
         COLOR = arc.color.WHITE_SMOKE
-        PATH = assets(FONT_TEKTON)
+        PATH = asset(FONT_TEKTON)
         SIZE = 20
 
     def __init__(self, scene, surface_level=Level.SURFACE, *args, **kwargs):
@@ -25,7 +29,7 @@ class MessageConsole(arc.SpriteList):
 
     def add_notifier_text(self, text):
         text_sprite = arc.create_text_sprite(text,
-                                             dataproxy.Meta.hz_screen_center(),
+                                             Meta.hz_screen_center(),
                                              -self._surface_level,
                                              self.Font.COLOR,
                                              font_name=self.Font.PATH, font_size=self.Font.SIZE,
@@ -47,9 +51,9 @@ class MessageConsole(arc.SpriteList):
         text_sprite = self._register[key]
         self._active_notification = text_sprite
         scene.animations.fire(text_sprite,
-                              animations.Animation.peek_from_bottom(text_sprite.center_x, self._surface_level,
-                                                                    speed=animations.Speed.FAST,
-                                                                    callback=(self.reset_active_notification,)))
+                              xarc.Animation.peek_from_bottom(text_sprite.center_x, self._surface_level,
+                                                              speed=xarc.Speed.FAST,
+                                                              callback=(self.reset_active_notification,)))
 
     def reset(self):
         if self.is_notification_active():

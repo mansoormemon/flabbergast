@@ -2,7 +2,19 @@ from enum import Enum
 
 import arcade as arc
 
-from flabbergast.assets import *
+from flabbergast.assets import asset
+
+from flabbergast.assets import (
+    AUDIO_POSITIVEINTERFACEHOVER,
+    WGT_DEFAULT_ARROWDOWN,
+    WGT_DEFAULT_ARROWLEFT,
+    WGT_DEFAULT_ARROWRIGHT,
+    WGT_DEFAULT_ARROWUP,
+    WGT_DOWN_ARROWDOWN,
+    WGT_DOWN_ARROWLEFT,
+    WGT_DOWN_ARROWRIGHT,
+    WGT_DOWN_ARROWUP
+)
 
 
 class AbstractOption(arc.Sprite):
@@ -15,17 +27,17 @@ class AbstractOption(arc.Sprite):
         ON_HOVER = 0.8
 
     class Response:
-        NOTE = AUDIO_MOUSE_HOVER_RESPONSE
+        NOTE = AUDIO_POSITIVEINTERFACEHOVER
         VOLUME = 0.4
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, *args, scale=Scale.DEFAULT, **kwargs):
+        super().__init__(*args, scale=scale, **kwargs)
 
     class Callback:
         @staticmethod
         def hover(entity, *args):
             entity.scale = entity.Scale.ON_HOVER
-            note = arc.Sound(assets(entity.Response.NOTE))
+            note = arc.Sound(asset(entity.Response.NOTE))
             note_player = note.play()
             note.set_volume(entity.Response.VOLUME, note_player)
 
@@ -42,7 +54,7 @@ class AbstractOption(arc.Sprite):
             entity.set_texture(entity.TextureTypeList.DEFAULT.value)
 
         @staticmethod
-        def trigger_click_action(context, entity, *args):
+        def click(context, entity, *args):
             pass
 
 
@@ -53,8 +65,8 @@ class TextOption(AbstractOption):
         self._text = text
 
         for texture in self.TextureTypeList:
-            texture_path = f"{DIR_TEXT}/{texture.name.lower()}/{self._text}.{FMT_IMAGE}"
-            self.textures.append(arc.load_texture(assets(texture_path)))
+            texture_path = asset(f"text/{texture.name.lower()}/{self._text}.png")
+            self.textures.append(arc.load_texture(texture_path))
         self.set_texture(self.TextureTypeList.DEFAULT.value)
 
     def get_text(self):
@@ -66,8 +78,8 @@ class ImageOption(AbstractOption):
         super().__init__(*args, **kwargs)
 
         for texture in textures:
-            self.textures.append(arc.load_texture(assets(texture)))
-
+            texture_path = asset(texture)
+            self.textures.append(arc.load_texture(texture_path))
         self.set_texture(self.TextureTypeList.DEFAULT.value)
 
 
@@ -85,7 +97,7 @@ class NavigationArrow(ImageOption):
     class Response(ImageOption.Response):
         VOLUME = 0.1
 
-    def __init__(self, direction, *args, **kwargs):
+    def __init__(self, direction, *args, scale=Scale.DEFAULT, **kwargs):
         texture_list = None
         match direction:
             case self.Direction.DOWN:
@@ -97,4 +109,13 @@ class NavigationArrow(ImageOption):
             case self.Direction.UP:
                 texture_list = [WGT_DEFAULT_ARROWUP, WGT_DOWN_ARROWUP]
 
-        super().__init__(texture_list, *args, scale=self.Scale.DEFAULT, **kwargs)
+        super().__init__(texture_list, *args, scale=scale, **kwargs)
+
+
+class TooltipOption(ImageOption):
+    class Scale:
+        DEFAULT = 0.44
+        ON_HOVER = 0.48
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, scale=self.Scale.DEFAULT, **kwargs)

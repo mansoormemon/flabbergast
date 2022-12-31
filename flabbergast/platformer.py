@@ -1,17 +1,25 @@
-import arcade_curtains as arc_curts
+from .assets import *
+from .dataproxy import *
+from .core.mapgenerator import *
+from .core.vmath import *
+from .xarcade import *
+from .references import SceneList
 
-from flabbergast.assets import *
-from flabbergast.dataproxy import *
-from flabbergast.mapgenerator import *
-from flabbergast.mathematics import *
 
-
-class Scene(arc_curts.BaseScene):
+class Platformer(AbstractScene):
     class Tile:
         SCALE = 0.36
         SIZE = 64
 
     PADDING = int(5 / Tile.SCALE)
+
+    def __init__(self):
+        self._walls = None
+        self._controls = None
+        self._sprites = None
+        self._maze_map = None
+
+        super().__init__(SceneList.PLATFORMER)
 
     def setup(self):
         arc.set_background_color(arc.color.ALMOND)
@@ -45,7 +53,7 @@ class Scene(arc_curts.BaseScene):
             for x, col in enumerate(row):
                 if col:
                     continue
-                tile = assets(TEXTURES_FLOORGARDEN)
+                tile = asset(TEXTURES_FLOORGARDEN)
 
                 wall = arc.Sprite(tile, self.Tile.SCALE)
                 wall.center_x = (x * scaled_tile_size) + x_offset
