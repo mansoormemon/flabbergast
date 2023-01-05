@@ -7,6 +7,8 @@ class MascotList(Enum):
 
 
 class SceneList(Enum):
-    MAINMENU = 0
-    PLATFORMER = 1
-    SETTINGSPANE = 2
+    LOADINGSCREEN = 0
+    MAINMENU = 1
+    CUTSCENE = 2
+    PLATFORMER = 3
+    SETTINGSPANE = 4

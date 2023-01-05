@@ -1,8 +1,8 @@
 import arcade as arc
 
-from flabbergast.assets import asset
+from ..assets import asset
 
-from flabbergast.assets import (
+from ..assets import (
     FONT_TEKTON
 )
 

@@ -175,6 +175,8 @@ class SettingsPane(xarc.AbstractScene):
                                                  Meta.screen_height() * self.PLAYER_NAME_LABEL_Y_BOTTOM)
         self._ui_manager.add(self._player_name_box)
 
+        self.events.key_up(arc.key.ESCAPE, lambda *_: self.curtains.set_scene(SceneList.MAINMENU))
+
     def get_console(self):
         return self._console
 
@@ -185,16 +187,12 @@ class SettingsPane(xarc.AbstractScene):
         return self._player_name_box
 
     def draw(self):
-        # Draw background.
         self._background.draw_scaled(Meta.hz_screen_center(), Meta.vt_screen_center())
 
-        # Draw pane.
         self._pane.draw_scaled(Meta.hz_screen_center(), Meta.vt_screen_center())
 
-        # Draw sprite lists.
         super().draw()
 
-        # Draw UI manager.
         self._ui_manager.draw()
 
     def leave_scene(self, next_scene):

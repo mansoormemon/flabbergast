@@ -7,6 +7,7 @@ def asset(path):
     return str(RESOURCE_PATH.joinpath(path).resolve())
 
 
+AUDIO_KEYBOARDTYPING = "audio/keyboardtyping.mp3"
 AUDIO_POP = "audio/pop.mp3"
 AUDIO_POSITIVEINTERFACEBEEP = "audio/positiveinterfacebeep.mp3"
 AUDIO_POSITIVEINTERFACEHOVER = "audio/positiveinterfacehover.mp3"

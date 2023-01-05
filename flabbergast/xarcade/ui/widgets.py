@@ -86,9 +86,7 @@ class InputBox(arc_gui.UIInputText):
 
         self._previous_state = False
 
-    def on_update(self, dt):
-        super().on_update(dt)
-
+    def on_update(self, delta_time):
         if self._previous_active_state != self._active:
             if not self._active:
                 self.on_blur()

@@ -27,7 +27,7 @@ class MenuOption(xarc.TextOption):
             selected_option = MainMenu.OptionList[entity.get_text().upper()]
             match selected_option:
                 case MainMenu.OptionList.START:
-                    context.curtains.set_scene(SceneList.PLATFORMER)
+                    context.curtains.set_scene(SceneList.CUTSCENE)
                 case MainMenu.OptionList.SETTINGS:
                     context.curtains.set_scene(SceneList.SETTINGSPANE)
                 case MainMenu.OptionList.QUIT:
@@ -52,7 +52,6 @@ class MainMenu(xarc.AbstractScene):
     MENU_OPTIONS_Y_CENTER = 0.08
 
     def __init__(self, *args, **kwargs):
-        self._id = None
         self._first_visit = None
         self._sound = None
         self._sound_player = None
@@ -104,18 +103,14 @@ class MainMenu(xarc.AbstractScene):
             self._menu_opts.append(opt)
 
     def draw(self):
-        # Draw background.
         self._background.draw_scaled(Meta.hz_screen_center(), Meta.vt_screen_center())
 
-        # Draw corporation logo.
         self._logo_corp.draw_scaled(Meta.screen_width() * self.LOGO_CORP_X_LEFT,
                                     Meta.screen_height() * self.LOGO_CORP_Y_BOTTOM)
 
-        # Draw corporation mascot.
         self._mascot_corp.draw_scaled(Meta.screen_width() * self.MASCOT_CORP_X_LEFT,
                                       Meta.screen_height() * self.MASCOT_CORP_Y_BOTTOM)
 
-        # Draw sprite lists.
         super().draw()
 
     def connect_menu_option_events(self, entity):
@@ -144,12 +139,10 @@ class MainMenu(xarc.AbstractScene):
             chain.add_sequences(logo_animation, *menu_opts_animation)
             self.animations.fire(None, chain)
 
-        # Play background music.
         self._sound_player = arc.play_sound(self._sound, looping=True)
 
         # Update first visit flag.
         self._first_visit = False
 
     def leave_scene(self, next_scene):
-        # Stop background music.
         arc.stop_sound(self._sound_player)

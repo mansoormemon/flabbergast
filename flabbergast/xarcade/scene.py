@@ -17,3 +17,6 @@ class AbstractScene(arc_curts.BaseScene, ABC):
 
     def get_reference_key(self):
         return self._reference.name.lower()
+
+    def on_update(self, delta_time):
+        pass
