@@ -1,43 +1,45 @@
+from typing import Callable, Iterable, Optional
+
 import arcade_curtains as arc_curts
 
 
 class Alpha:
-    INVISIBLE = 0
-    VISIBLE = 255
+    INVISIBLE: int = 0
+    VISIBLE: int = 255
 
 
 class Delay:
-    VERY_SHORT = 0.5
-    SHORT = 1
-    MEDIUM = 2
-    LONG = 3
-    VERY_LONG = 4
+    VERY_SHORT: float = 0.5
+    SHORT: float = 1.0
+    MEDIUM: float = 2.0
+    LONG: float = 3.0
+    VERY_LONG: float = 4.0
 
 
 class Scale:
-    DELTA = 0.05
-    ONE_HALF = 0.5
-    UNITY = 1.0
-    THREE_HAVLES = 1.5
-    TWICE = 2.0
-    THRICE = 3.0
+    DELTA: float = 0.05
+    ONE_HALF: float = 0.5
+    UNITY: float = 1.0
+    THREE_HAVLES: float = 1.5
+    TWICE: float = 2.0
+    THRICE: float = 3.0
 
 
 class Speed:
-    VERY_FAST = 0.5
-    FAST = 1
-    DEFAULT = 2
-    SLOW = 3
-    VERY_SLOW = 4
+    VERY_FAST: float = 0.5
+    FAST: float = 1.0
+    DEFAULT: float = 2.0
+    SLOW: float = 3.0
+    VERY_SLOW: float = 4.0
 
 
 class Animation:
     @staticmethod
-    def animationsequence(frame_sequence):
-        def impl(*args, speed=Speed.DEFAULT, callback=None):
-            time_frames = frame_sequence(*args)
-            sequence = arc_curts.Sequence()
-            point_in_time = 0
+    def animationsequence(frame_sequence: Callable) -> Callable:
+        def impl(*args, speed: float = Speed.DEFAULT, callback: Optional[Callable] = None) -> arc_curts.Sequence:
+            time_frames: Iterable = frame_sequence(*args)
+            sequence: arc_curts.Sequence = arc_curts.Sequence()
+            point_in_time: float = 0.0
             for key_frame, span in time_frames:
                 sequence.add_keyframe(point_in_time, key_frame)
                 if span:
@@ -51,7 +53,7 @@ class Animation:
 
     @staticmethod
     @animationsequence
-    def fade_in():
+    def fade_in() -> arc_curts.Sequence:
         return [
             (arc_curts.KeyFrame(alpha=Alpha.INVISIBLE), Delay.SHORT),
             (arc_curts.KeyFrame(alpha=Alpha.VISIBLE), None),
@@ -59,7 +61,7 @@ class Animation:
 
     @staticmethod
     @animationsequence
-    def fade_in_with_delay():
+    def fade_in_with_delay() -> arc_curts.Sequence:
         return [
             (arc_curts.KeyFrame(alpha=Alpha.INVISIBLE), Delay.SHORT),
             (arc_curts.KeyFrame(alpha=Alpha.INVISIBLE), Delay.VERY_SHORT),
@@ -68,7 +70,7 @@ class Animation:
 
     @staticmethod
     @animationsequence
-    def inflate(begin_scale=Scale.UNITY, end_scale=Scale.UNITY + Scale.DELTA):
+    def inflate(begin_scale: float = Scale.UNITY, end_scale: float = Scale.UNITY + Scale.DELTA) -> arc_curts.Sequence:
         return [
             (arc_curts.KeyFrame(scale=begin_scale), Delay.SHORT),
             (arc_curts.KeyFrame(scale=end_scale), None),
@@ -76,7 +78,7 @@ class Animation:
 
     @staticmethod
     @animationsequence
-    def deflate(begin_scale=Scale.UNITY + Scale.DELTA, end_scale=Scale.UNITY):
+    def deflate(begin_scale: float = Scale.UNITY + Scale.DELTA, end_scale: float = Scale.UNITY) -> arc_curts.Sequence:
         return [
             (arc_curts.KeyFrame(scale=begin_scale), Delay.SHORT),
             (arc_curts.KeyFrame(scale=end_scale), None),
@@ -84,7 +86,7 @@ class Animation:
 
     @staticmethod
     @animationsequence
-    def peek_from_bottom(x, y):
+    def peek_from_bottom(x: float, y: float) -> arc_curts.Sequence:
         return [
             (arc_curts.KeyFrame(position=(x, -y)), Delay.VERY_SHORT),
             (arc_curts.KeyFrame(position=(x, y)), Delay.MEDIUM),

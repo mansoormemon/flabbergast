@@ -1,62 +1,73 @@
+from typing import Callable, Dict, Iterable, Optional, Tuple
+
 import arcade as arc
 
-from ..assets import asset
+from .abstractscene import AbstractScene
+from .eventtimer import EventTimer
+from .metadata import Meta
+from .reference import Reference
 
-from ..assets import (
-    FONT_TEKTON
-)
+FONT_COLOR: Tuple[int, int, int] = arc.color.WHITE_SMOKE
+FONT_NAME: str = "Tekton Display Ssi"
+FONT_SIZE: int = 12
+DELTA_Y: Callable = lambda level: level / 30
+ANIMATION_TIMESTAMPS = [(0, 0), (0, 2), (0, 3)]
 
-from .. import xarcade as xarc
-from ..dataproxy import Meta
+
+def _make_animation(timer: EventTimer, timestamps: Iterable[Tuple[int, int]], funcs: Iterable[Callable]):
+    for timestamp, func in zip(timestamps, funcs):
+        timer.register_event(timestamp, func, False)
 
 
 class MessageConsole(arc.SpriteList):
     class Level:
-        SURFACE = 48
+        Y: int = 36
 
-    class Font:
-        COLOR = arc.color.WHITE_SMOKE
-        PATH = asset(FONT_TEKTON)
-        SIZE = 20
-
-    def __init__(self, scene, surface_level=Level.SURFACE, *args, **kwargs):
+    def __init__(self, context: AbstractScene, y_level: float = Level.Y, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._scene = scene
-        self._surface_level = surface_level
-        self._register = {}
-        self._active_notification = None
+        self.context: AbstractScene = context
+        self.y_level: float = y_level
+        self.register: Dict[Reference, arc.Text] = {}
+        self.active_notification: Optional[arc.Text] = None
+        self.timer: EventTimer = EventTimer()
+        _make_animation(self.timer, ANIMATION_TIMESTAMPS, [self.notification_slide_up,
+                                                           self.notification_slide_down,
+                                                           self.reset])
 
-    def add_notifier_text(self, text):
-        text_sprite = arc.create_text_sprite(text,
-                                             Meta.hz_screen_center(),
-                                             -self._surface_level,
-                                             self.Font.COLOR,
-                                             font_name=self.Font.PATH, font_size=self.Font.SIZE,
-                                             anchor_x="center", anchor_y="center")
-        self.append(text_sprite)
+    def add(self, key: Reference, text: str):
+        self.register[key] = arc.Text(text,
+                                      Meta.hz_screen_center(),
+                                      -self.y_level,
+                                      color=FONT_COLOR,
+                                      font_name=FONT_NAME,
+                                      font_size=FONT_SIZE,
+                                      anchor_x="center", anchor_y="center")
 
-        self._register[text] = text_sprite
+    def notification_slide_up(self):
+        self.active_notification.y += DELTA_Y(self.y_level)
 
-    def reset_active_notification(self):
-        self._active_notification = None
+    def notification_slide_down(self):
+        self.active_notification.y -= DELTA_Y(self.y_level)
 
-    def is_notification_active(self):
-        return self._active_notification is not None
+    def on_update(self, delta_time: float = 1 / 60):
+        if self.active_notification is not None:
+            self.timer.tick(delta_time)
 
-    def trigger_notification(self, scene, key):
-        if self.is_notification_active():
+    def trigger_notification(self, key: Reference):
+        if self.active_notification is not None:
             self.reset()
 
-        text_sprite = self._register[key]
-        self._active_notification = text_sprite
-        scene.animations.fire(text_sprite,
-                              xarc.Animation.peek_from_bottom(text_sprite.center_x, self._surface_level,
-                                                              speed=xarc.Speed.FAST,
-                                                              callback=(self.reset_active_notification,)))
+        self.active_notification = self.register[key]
 
     def reset(self):
-        if self.is_notification_active():
-            self._scene.animations.kill(self._active_notification)
-            self._active_notification.center_y = -self._surface_level
-            self.reset_active_notification()
+        if self.active_notification is not None:
+            self.active_notification.y = -self.y_level
+            self.active_notification = None
+            self.timer.reset()
+
+    def draw(self, *, filter_=None, pixelated=None, blend_function=None):
+        if self.active_notification is not None:
+            self.active_notification.draw()
+
+        super().draw(filter=filter_, pixelated=pixelated, blend_function=blend_function)

@@ -1,204 +1,156 @@
-from enum import Enum
+from __future__ import annotations
+
+from typing import Callable, Optional
 
 import arcade as arc
 import arcade.gui as arc_gui
 
-from .assets import asset
-from .avatar import Avatar
-from .core import vmath
-from .dataproxy import Meta, User
-from .references import SceneList
-
+from . import xarcade as xarc
 from .assets import (
     AUDIO_POSITIVEINTERFACEBEEP,
     BACKGROUND_SETTINGS,
     BACKGROUND_PANE,
     TEXT_SETTINGS
 )
+from .assets import asset
+from .avatar import Avatar
+from .references import SceneList
+from .userdata import User
 
-from . import xarcade as xarc
+SETTINGS_LABEL_Y: Callable = lambda: xarc.Meta.screen_height() * 0.8
+
+CONTROL_OPTIONS_Y: Callable = lambda: xarc.Meta.screen_height() * 0.2
+
+AVATAR_Y: Callable = lambda: xarc.Meta.screen_height() * 0.55
+
+PLAYER_NAME_BOX_Y: Callable = lambda: xarc.Meta.screen_height() * 0.32
+
+
+class ControlOptionList(xarc.Reference):
+    BACK = 0
+    SAVE = 1
+
+
+class ConsoleNotificationList(xarc.Reference):
+    SAVED = "Changes Saved!"
 
 
 class ControlOption(xarc.TextOption):
-    WIDTH = 384
-
-    class FONT:
-        FONT = 22
+    WIDTH: int = 384
 
     class Scale(xarc.TextOption.Scale):
-        DEFAULT = 0.6
-        ON_HOVER = 0.65
+        DEFAULT: float = 0.6
+        ON_HOVER: float = 0.65
 
     class Response(xarc.TextOption.Response):
-        VOLUME = 0.3
+        VOLUME: float = 0.3
 
-    def __init__(self, text, *args, **kwargs):
-        super().__init__(text, *args, scale=self.Scale.DEFAULT, **kwargs)
+    def __init__(self, text: str, *args, scale: float = Scale.DEFAULT, **kwargs):
+        super().__init__(text, *args, scale=scale, **kwargs)
 
-    class Callback(xarc.TextOption.Callback):
-        @staticmethod
-        def click(context, entity, *args):
-            selected_option = SettingsPane.ControlOptionList[entity.get_text().upper()]
-            match selected_option:
-                case SettingsPane.ControlOptionList.BACK:
-                    context.curtains.set_scene(SceneList.MAINMENU)
-                case SettingsPane.ControlOptionList.SAVE:
-                    User.set_team(context.get_mascot().team.data)
-                    User.set_name(context.get_player_name_box().text)
-                    context.get_mascot().team.flush()
-                    context.get_player_name_box().flush()
-                    User.save()
-                    note = arc.Sound(asset(AUDIO_POSITIVEINTERFACEBEEP))
-                    note_player = note.play()
-                    note.set_volume(entity.Response.VOLUME, note_player)
-                    context.get_console().trigger_notification(context,
-                                                               SettingsPane.ConsoleNotificationList.SAVED.name.title())
+    def click(self, context: SettingsPane, *args):
+        selected_option: ControlOptionList = ControlOptionList[self.text.upper()]
+        match selected_option:
+            case ControlOptionList.BACK:
+                context.curtains.set_scene(SceneList.MAINMENU)
+            case ControlOptionList.SAVE:
+                User.set_team(context.avatar.team.data)
+                User.set_name(context.player_name_box.text)
+                context.avatar.flush()
+                context.player_name_box.flush()
+                User.save()
+                note: arc.Sound = arc.Sound(asset(AUDIO_POSITIVEINTERFACEBEEP))
+                note_player: arc.sound.media.Player = note.play()
+                note.set_volume(self.Response.VOLUME, note_player)
+                context.console.trigger_notification(ConsoleNotificationList.SAVED)
+
+    def connect(self, context: SettingsPane, *_):
+        super().connect(context)
+        context.events.click(self, lambda *args: self.click(context, *args))
 
 
 class SettingsPane(xarc.AbstractScene):
-    class ControlOptionList(Enum):
-        BACK = 0
-        SAVE = 1
-
-    class ConsoleNotificationList(Enum):
-        SAVED = 0
-
-    SETTINGS_LABEL_Y_BOTTOM = 0.8
-
-    CONTROL_OPTIONS_Y_BOTTOM = 0.2
-
-    MASCOT_Y_BOTTOM = 0.55
-
-    PLAYER_NAME_LABEL_Y_BOTTOM = 0.32
-    PLAYER_NAME_LABEL_SCALE = 0.44
-
-    ARROW_SCALE = 0.36
-    ARROW_LEFT_X_LEFT = 0.35
-    ARROW_RIGHT_X_LEFT = 0.65
-
     def __init__(self, *args, **kwargs):
-        self._id = None
-        self._note = None
-        self._background = None
-        self._pane = None
-        self._interactive_elements = None
-        self._lbl_settings = None
-        self._control_opts = None
-        self._console = None
-        self._mascot = None
-        self._ui_widgets = None
-        self._mascot_arrow_left = None
-        self._mascot_arrow_right = None
-        self._ui_manager = None
-        self._player_name_box = None
+        self.background: Optional[arc.Texture] = None
+        self.pane: Optional[arc.Texture] = None
+        self.interactive_elements: Optional[arc.SpriteList] = None
+        self.lbl_settings: Optional[arc.Sprite] = None
+        self.control_opts: Optional[arc.SpriteList] = None
+        self.console: Optional[xarc.MessageConsole] = None
+        self.avatar: Optional[Avatar] = None
+        self.ui_widgets: Optional[arc.SpriteList] = None
+        self.avatar_arrow_left: Optional[xarc.NavigationArrow] = None
+        self.avatar_arrow_right: Optional[xarc.NavigationArrow] = None
+        self.ui_manager: Optional[arc_gui.UIManager] = None
+        self.player_name_box: Optional[xarc.ui.InputBox] = None
 
         super().__init__(SceneList.SETTINGSPANE, *args, **kwargs)
 
     def setup(self):
-        # Static contents.
-        self._background = arc.load_texture(asset(BACKGROUND_SETTINGS))
-        self._pane = arc.load_texture(asset(BACKGROUND_PANE))
+        self.background = arc.load_texture(asset(BACKGROUND_SETTINGS))
 
-        # Interactive elements.
-        self._interactive_elements = arc.SpriteList(use_spatial_hash=True)
+        self.pane = arc.load_texture(asset(BACKGROUND_PANE))
 
-        self._lbl_settings = arc.Sprite(asset(TEXT_SETTINGS),
-                                        center_x=Meta.hz_screen_center(),
-                                        center_y=Meta.screen_height() * self.SETTINGS_LABEL_Y_BOTTOM)
-        self._interactive_elements.append(self._lbl_settings)
-        self.events.hover(self._lbl_settings,
-                          lambda entity, *args: self.animations.fire(entity,
-                                                                     xarc.Animation.inflate(entity.scale)))
-        self.events.out(self._lbl_settings,
-                        lambda entity, *args: self.animations.fire(entity,
-                                                                   xarc.Animation.deflate(entity.scale)))
+        self.interactive_elements = arc.SpriteList(use_spatial_hash=True)
 
-        # Control options.
-        self._control_opts = arc.SpriteList(use_spatial_hash=True)
+        self.lbl_settings = arc.Sprite(asset(TEXT_SETTINGS),
+                                       center_x=xarc.Meta.hz_screen_center(),
+                                       center_y=SETTINGS_LABEL_Y())
+        self.events.hover(self.lbl_settings,
+                          lambda entity, *_: self.animations.fire(entity,
+                                                                  xarc.Animation.inflate(entity.scale)))
+        self.events.out(self.lbl_settings,
+                        lambda entity, *_: self.animations.fire(entity,
+                                                                xarc.Animation.deflate(entity.scale)))
+        self.interactive_elements.append(self.lbl_settings)
 
-        x_disp_offset = vmath.half((len(self.ControlOptionList) - 1) * ControlOption.WIDTH)
-        for n, opt in enumerate(self.ControlOptionList):
-            opt = ControlOption(opt.name.lower(),
-                                center_x=Meta.hz_screen_center() + (n * ControlOption.WIDTH) - x_disp_offset,
-                                center_y=Meta.screen_height() * self.CONTROL_OPTIONS_Y_BOTTOM)
-            self._control_opts.append(opt)
-            self.events.hover(opt, opt.Callback.hover)
-            self.events.out(opt, opt.Callback.out)
-            self.events.down(opt, opt.Callback.down)
-            self.events.up(opt, opt.Callback.up)
-            self.events.click(
-                opt, lambda *args: opt.Callback.click(self, *args)
-            )
+        self.control_opts = arc.SpriteList(use_spatial_hash=True)
+        x_disp_offset: float = (len(ControlOptionList) - 1) * ControlOption.WIDTH * 0.5
+        for n, opt in enumerate(ControlOptionList):
+            ctrl_opt = ControlOption(opt.as_key(),
+                                     center_x=xarc.Meta.hz_screen_center() + (n * ControlOption.WIDTH) - x_disp_offset,
+                                     center_y=CONTROL_OPTIONS_Y())
+            ctrl_opt.connect(self)
+            self.control_opts.append(ctrl_opt)
 
-        # Message console.
-        self._console = xarc.MessageConsole(self, use_spatial_hash=True)
-        for notification in self.ConsoleNotificationList:
-            self._console.add_notifier_text(notification.name.title())
+        self.console = xarc.MessageConsole(self, use_spatial_hash=True)
+        for notification in ConsoleNotificationList:
+            self.console.add(notification, notification.value)
 
-        # Avatar mascot.
-        self._mascot = Avatar(Meta.hz_screen_center(),
-                              Meta.screen_height() * self.MASCOT_Y_BOTTOM)
-        self.events.hover(self._mascot.get_ring(), self._mascot.get_ring().Callback.hover)
-        self.events.out(self._mascot.get_ring(), self._mascot.get_ring().Callback.out)
-        self.events.down(self._mascot.get_ring(), self._mascot.get_ring().Callback.down)
-        self.events.up(self._mascot.get_ring(), self._mascot.get_ring().Callback.up)
+        self.avatar = Avatar(xarc.Meta.hz_screen_center(), AVATAR_Y())
+        self.avatar.connect(self)
 
-        # UI widgets.
-        self._ui_widgets = arc.SpriteList(use_spatial_hash=True)
+        self.ui_widgets = arc.SpriteList(use_spatial_hash=True)
 
-        self._mascot_arrow_left = xarc.NavigationArrow(xarc.NavigationArrow.Direction.LEFT,
-                                                       center_x=Meta.screen_width() * self.ARROW_LEFT_X_LEFT,
-                                                       center_y=Meta.screen_height() * self.MASCOT_Y_BOTTOM)
-        self._ui_widgets.append(self._mascot_arrow_left)
-        self.events.hover(self._mascot_arrow_left, self._mascot_arrow_left.Callback.hover)
-        self.events.out(self._mascot_arrow_left, self._mascot_arrow_left.Callback.out)
-        self.events.down(self._mascot_arrow_left, self._mascot_arrow_left.Callback.down)
-        self.events.up(self._mascot_arrow_left, self._mascot_arrow_left.Callback.up)
-        self.events.click(self._mascot_arrow_left, lambda *args: self._mascot.change_avatar(self._mascot.Step.BACK))
+        self.ui_manager = arc_gui.UIManager()
 
-        self._mascot_arrow_right = xarc.NavigationArrow(xarc.NavigationArrow.Direction.RIGHT,
-                                                        center_x=Meta.screen_width() * self.ARROW_RIGHT_X_LEFT,
-                                                        center_y=Meta.screen_height() * self.MASCOT_Y_BOTTOM)
-        self._ui_widgets.append(self._mascot_arrow_right)
-        self.events.hover(self._mascot_arrow_right, self._mascot_arrow_right.Callback.hover)
-        self.events.out(self._mascot_arrow_right, self._mascot_arrow_right.Callback.out)
-        self.events.down(self._mascot_arrow_right, self._mascot_arrow_right.Callback.down)
-        self.events.up(self._mascot_arrow_right, self._mascot_arrow_right.Callback.up)
-        self.events.click(self._mascot_arrow_right, lambda *args: self._mascot.change_avatar(self._mascot.Step.FORWARD))
+        self.player_name_box = xarc.ui.InputBox(User.get_name(),
+                                                self.ui_manager,
+                                                self.ui_widgets,
+                                                xarc.Meta.hz_screen_center(),
+                                                PLAYER_NAME_BOX_Y())
+        self.player_name_box.connect(self)
+        self.ui_manager.add(self.player_name_box)
 
-        # UI manager.
-        self._ui_manager = arc_gui.UIManager()
+    def leave_scene(self, next_scene: xarc.AbstractScene):
+        self.console.reset()
 
-        # Player name label.
-        self._player_name_box = xarc.ui.InputBox(self, self._ui_manager, self._ui_widgets,
-                                                 Meta.hz_screen_center(),
-                                                 Meta.screen_height() * self.PLAYER_NAME_LABEL_Y_BOTTOM)
-        self._ui_manager.add(self._player_name_box)
-
-        self.events.key_up(arc.key.ESCAPE, lambda *_: self.curtains.set_scene(SceneList.MAINMENU))
-
-    def get_console(self):
-        return self._console
-
-    def get_mascot(self):
-        return self._mascot
-
-    def get_player_name_box(self):
-        return self._player_name_box
+        # Revert unsaved changes.
+        self.avatar.stabilize()
+        self.player_name_box.stabilize()
 
     def draw(self):
-        self._background.draw_scaled(Meta.hz_screen_center(), Meta.vt_screen_center())
-
-        self._pane.draw_scaled(Meta.hz_screen_center(), Meta.vt_screen_center())
+        self.background.draw_scaled(xarc.Meta.hz_screen_center(), xarc.Meta.vt_screen_center())
+        self.pane.draw_scaled(xarc.Meta.hz_screen_center(), xarc.Meta.vt_screen_center())
 
         super().draw()
 
-        self._ui_manager.draw()
+        self.ui_manager.draw()
 
-    def leave_scene(self, next_scene):
-        # Reset console.
-        self._console.reset()
+    def on_update(self, delta_time: float):
+        self.console.on_update(delta_time)
 
-        # Revert changes if unsaved.
-        self._mascot.team.stabilize()
-        self._player_name_box.stabilize()
+    def on_key_press(self, symbol: int, modifiers: int):
+        match symbol:
+            case arc.key.ESCAPE:
+                self.curtains.set_scene(SceneList.MAINMENU)

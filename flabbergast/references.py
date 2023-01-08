@@ -1,14 +1,14 @@
-from enum import Enum
+from . import xarcade as xarc
 
 
-class MascotList(Enum):
+class MascotList(xarc.Reference):
     FIESTYLION = 0
     LONEWOLF = 1
 
 
-class SceneList(Enum):
-    LOADINGSCREEN = 0
+class SceneList(xarc.Reference):
+    SPLASHSCREEN = 0
     MAINMENU = 1
-    CUTSCENE = 2
+    SETTINGSPANE = 2
     PLATFORMER = 3
-    SETTINGSPANE = 4
+    CUTSCENE = 4

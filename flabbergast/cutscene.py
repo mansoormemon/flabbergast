@@ -1,26 +1,28 @@
 import arcade as arc
 
+from . import xarcade as xarc
 from .references import SceneList
 
-from . import xarcade as xarc
+TIMEOUT = 2
 
 
 class CutScene(xarc.AbstractScene):
-    TIMEOUT = 2
-
     def __init__(self):
-        self._time_elapsed = None
+        self.timer = None
 
         super().__init__(SceneList.CUTSCENE)
 
     def setup(self):
-        self.events.key_up(arc.key.ESCAPE, lambda *_: self.curtains.set_scene(SceneList.MAINMENU))
+        self.timer = xarc.EventTimer()
+        self.timer.register_event((0, TIMEOUT), lambda *_: self.curtains.set_scene(SceneList.PLATFORMER))
 
-    def on_update(self, delta_time):
-        self._time_elapsed += delta_time
-        seconds = int(self._time_elapsed) % 60
-        if seconds == self.TIMEOUT:
-            self.curtains.set_scene(SceneList.PLATFORMER)
+    def on_key_press(self, symbol: int, modifiers: int):
+        match symbol:
+            case arc.key.ESCAPE:
+                self.curtains.set_scene(SceneList.MAINMENU)
 
-    def enter_scene(self, previous_scene):
-        self._time_elapsed = 0
+    def on_update(self, delta_time: float):
+        self.timer.tick(delta_time)
+
+    def leave_scene(self, previous_scene: xarc.AbstractScene):
+        self.timer.reset()

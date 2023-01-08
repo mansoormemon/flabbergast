@@ -1,8 +1,4 @@
-from enum import Enum
-
 import arcade as arc
-
-from flabbergast.assets import asset
 
 from flabbergast.assets import (
     AUDIO_POSITIVEINTERFACEHOVER,
@@ -15,107 +11,109 @@ from flabbergast.assets import (
     WGT_DOWN_ARROWRIGHT,
     WGT_DOWN_ARROWUP
 )
+from .abstractscene import AbstractScene
+from .reference import Reference
+from ..assets import asset
 
 
 class AbstractOption(arc.Sprite):
-    class TextureTypeList(Enum):
+    class TextureTypeList(Reference):
         DEFAULT = 0
         DOWN = 1
 
     class Scale:
-        DEFAULT = 0.75
-        ON_HOVER = 0.8
+        DEFAULT: float = 0.75
+        ON_HOVER: float = 0.8
 
     class Response:
-        NOTE = AUDIO_POSITIVEINTERFACEHOVER
-        VOLUME = 0.4
+        NOTE: str = AUDIO_POSITIVEINTERFACEHOVER
+        VOLUME: float = 0.4
 
-    def __init__(self, *args, scale=Scale.DEFAULT, **kwargs):
+    def __init__(self, *args, scale: float = Scale.DEFAULT, **kwargs):
         super().__init__(*args, scale=scale, **kwargs)
 
-    class Callback:
-        @staticmethod
-        def hover(entity, *args):
-            entity.scale = entity.Scale.ON_HOVER
-            note = arc.Sound(asset(entity.Response.NOTE))
-            note_player = note.play()
-            note.set_volume(entity.Response.VOLUME, note_player)
+    def hover(self, *_):
+        self.scale = self.Scale.ON_HOVER
+        note: arc.Sound = arc.Sound(asset(self.Response.NOTE))
+        note_player: arc.sound.media.Player = note.play()
+        note.set_volume(self.Response.VOLUME, note_player)
 
-        @staticmethod
-        def out(entity, *args):
-            entity.scale = entity.Scale.DEFAULT
+    def out(self, *_):
+        self.scale = self.Scale.DEFAULT
 
-        @staticmethod
-        def down(entity, *args):
-            entity.set_texture(entity.TextureTypeList.DOWN.value)
+    def down(self, *_):
+        self.set_texture(self.TextureTypeList.DOWN.value)
 
-        @staticmethod
-        def up(entity, *args):
-            entity.set_texture(entity.TextureTypeList.DEFAULT.value)
+    def up(self, *_):
+        self.set_texture(self.TextureTypeList.DEFAULT.value)
 
-        @staticmethod
-        def click(context, entity, *args):
-            pass
+    def click(self, context: AbstractScene, *_):
+        pass
+
+    def connect(self, context: AbstractScene, *_):
+        context.events.hover(self, self.hover)
+        context.events.out(self, self.out)
+        context.events.down(self, self.down)
+        context.events.up(self, self.up)
 
 
 class TextOption(AbstractOption):
-    def __init__(self, text, *args, **kwargs):
+    def __init__(self, text: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._text = text
+        self.text: str = text
 
         for texture in self.TextureTypeList:
-            texture_path = asset(f"text/{texture.name.lower()}/{self._text}.png")
+            texture_path: str = asset(f"images/text/{texture.as_key()}/{self.text}.png")
             self.textures.append(arc.load_texture(texture_path))
         self.set_texture(self.TextureTypeList.DEFAULT.value)
 
-    def get_text(self):
-        return self._text
-
 
 class ImageOption(AbstractOption):
-    def __init__(self, textures, *args, **kwargs):
+    def __init__(self, textures: list, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         for texture in textures:
-            texture_path = asset(texture)
+            texture_path: str = asset(texture)
             self.textures.append(arc.load_texture(texture_path))
         self.set_texture(self.TextureTypeList.DEFAULT.value)
 
 
 class NavigationArrow(ImageOption):
-    class Direction(Enum):
+    class Direction(Reference):
         DOWN = 0
         LEFT = 1
         RIGHT = 2
         UP = 3
 
     class Scale(ImageOption.Scale):
-        DEFAULT = 0.34
-        ON_HOVER = 0.36
+        DEFAULT: float = 0.34
+        ON_HOVER: float = 0.36
 
     class Response(ImageOption.Response):
-        VOLUME = 0.1
+        VOLUME: float = 0.1
 
-    def __init__(self, direction, *args, scale=Scale.DEFAULT, **kwargs):
-        texture_list = None
+    def __init__(self, direction: Direction, *args, scale: float = Scale.DEFAULT, **kwargs):
+        self.direction = direction
+
+        texture_list: list = []
         match direction:
             case self.Direction.DOWN:
-                texture_list = [WGT_DEFAULT_ARROWDOWN, WGT_DOWN_ARROWDOWN]
+                texture_list += [WGT_DEFAULT_ARROWDOWN, WGT_DOWN_ARROWDOWN]
             case self.Direction.LEFT:
-                texture_list = [WGT_DEFAULT_ARROWLEFT, WGT_DOWN_ARROWLEFT]
+                texture_list += [WGT_DEFAULT_ARROWLEFT, WGT_DOWN_ARROWLEFT]
             case self.Direction.RIGHT:
-                texture_list = [WGT_DEFAULT_ARROWRIGHT, WGT_DOWN_ARROWRIGHT]
+                texture_list += [WGT_DEFAULT_ARROWRIGHT, WGT_DOWN_ARROWRIGHT]
             case self.Direction.UP:
-                texture_list = [WGT_DEFAULT_ARROWUP, WGT_DOWN_ARROWUP]
+                texture_list += [WGT_DEFAULT_ARROWUP, WGT_DOWN_ARROWUP]
 
         super().__init__(texture_list, *args, scale=scale, **kwargs)
 
 
 class TooltipOption(ImageOption):
     class Scale:
-        DEFAULT = 0.44
-        ON_HOVER = 0.48
+        DEFAULT: float = 0.44
+        ON_HOVER: float = 0.48
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, scale=self.Scale.DEFAULT, **kwargs)
+    def __init__(self, *args, scale: float = Scale.DEFAULT, **kwargs):
+        super().__init__(*args, scale=scale, **kwargs)

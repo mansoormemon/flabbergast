@@ -1,21 +1,27 @@
 from enum import Enum
+from typing import Tuple
 
 import arcade as arc
 import arcade.gui as arc_gui
 
-from flabbergast.assets import asset
-
-from flabbergast.assets import (
-    FONT_TEKTON,
+from ..options import TooltipOption
+from ...assets import (
     ICON_DEFAULT_EDITPENCIL,
     ICON_DOWN_EDITPENCIL,
     WGT_DEFAULT_INPUTBOX,
     WGT_DOWN_INPUTBOX
 )
+from ...assets import asset
 
-from flabbergast.core import vmath
-from flabbergast.dataproxy import AtomicData, Meta, User
-from ..options import TooltipOption
+FONT_COLOR: Tuple[int, int, int] = arc.color.WINE_DREGS
+FONT_NAME: str = "Tekton Display Ssi"
+FONT_SIZE: int = 22
+
+EDIT_BUTTON_X_CENTER_X: float = 0.36
+
+BOX_OFFSET: int = 8
+
+CHAR_LIMIT: int = 13
 
 
 class InputBox(arc_gui.UIInputText):
@@ -27,96 +33,78 @@ class InputBox(arc_gui.UIInputText):
         DELTA = 0.08
         DEFAULT = 0.55
 
-    class Font:
-        COLOR = arc.color.WINE_DREGS
-        NAME = "Tekton Display Ssi"
-        PATH = asset(FONT_TEKTON)
-        SIZE = 22
+    def __init__(self, text, ui_manager, widget_list, center_x, center_y):
+        self.ui_manager: arc_gui.UIManager = ui_manager
 
-    EDIT_BUTTON_X_CENTER_X = 0.36
+        self.widget_list: arc.SpriteList = widget_list
 
-    BOX_OFFSET = 8
+        self.background: arc.Sprite = arc.Sprite(center_x=center_x,
+                                                 center_y=center_y,
+                                                 scale=self.Scale.DEFAULT)
+        self.background.textures = [arc.load_texture(asset(WGT_DEFAULT_INPUTBOX)),
+                                    arc.load_texture(asset(WGT_DOWN_INPUTBOX))]
+        self.background.set_texture(self.TextureTypeList.DEFAULT.value)
+        self.widget_list.append(self.background)
 
-    CHAR_LIMIT = 13
+        x_offset: float = self.background.width * EDIT_BUTTON_X_CENTER_X
+        self.edit_button: TooltipOption = TooltipOption([ICON_DEFAULT_EDITPENCIL, ICON_DOWN_EDITPENCIL],
+                                                        center_x=center_x + x_offset,
+                                                        center_y=center_y)
+        self.widget_list.append(self.edit_button)
 
-    def __init__(self, context, ui_manager, widget_list, center_x, center_y):
-        self._context = context
-
-        self._ui_manager = ui_manager
-
-        self._widget_list = widget_list
-
-        self._center_x = center_x
-        self._center_y = center_y
-
-        self._background = arc.Sprite(center_x=self._center_x,
-                                      center_y=self._center_y,
-                                      scale=self.Scale.DEFAULT)
-        self._background.textures = [arc.load_texture(asset(WGT_DEFAULT_INPUTBOX)),
-                                     arc.load_texture(asset(WGT_DOWN_INPUTBOX))]
-        self._background.set_texture(self.TextureTypeList.DEFAULT.value)
-        self._widget_list.append(self._background)
-
-        x_offset = self._background.width * self.EDIT_BUTTON_X_CENTER_X
-        self._edit_button = TooltipOption([ICON_DEFAULT_EDITPENCIL, ICON_DOWN_EDITPENCIL],
-                                          center_x=self._center_x + x_offset,
-                                          center_y=self._center_y)
-        self._widget_list.append(self._edit_button)
-        self._context.events.hover(self._edit_button, self._edit_button.Callback.hover)
-        self._context.events.out(self._edit_button, self._edit_button.Callback.out)
-        self._context.events.down(self._edit_button, self._edit_button.Callback.down)
-        self._context.events.up(self._edit_button, self._edit_button.Callback.up)
-        self._context.events.click(self._edit_button, self.on_focus)
-
-        width = self._background.width * (self.Scale.DEFAULT + self.Scale.DELTA)
-        height = self._background.height * (self.Scale.DEFAULT + self.Scale.DELTA)
-        x = center_x - vmath.half(width) - self.BOX_OFFSET
-        y = center_y - vmath.half(height) - self.BOX_OFFSET
-        super().__init__(text=User.get_name(),
+        width: float = self.background.width * (self.Scale.DEFAULT + self.Scale.DELTA)
+        height: float = self.background.height * (self.Scale.DEFAULT + self.Scale.DELTA)
+        x: float = center_x - (width / 2) - BOX_OFFSET
+        y: float = center_y - (height / 2) - BOX_OFFSET
+        super().__init__(text=text,
                          x=x,
                          y=y,
                          width=width,
                          height=height,
-                         text_color=self.Font.COLOR,
-                         font_name=self.Font.NAME,
-                         font_size=self.Font.SIZE)
+                         text_color=FONT_COLOR,
+                         font_name=FONT_NAME,
+                         font_size=FONT_SIZE)
 
-        self._previous_active_state = False
-        self._previous_text = self.text
+        self.previous_active_state = False
+        self.previous_text = self.text
 
-        self._previous_state = False
+        self.previous_state = None
+
+    def connect(self, context):
+        self.edit_button.connect(context)
+        context.events.click(self.edit_button, self.on_focus)
 
     def on_update(self, delta_time):
-        if self._previous_active_state != self._active:
+        if self.previous_active_state != self._active:
             if not self._active:
                 self.on_blur()
-            self._previous_active_state = self._active
+            self.previous_active_state = self._active
 
-        if self._previous_text != self.doc.text:
-            self.doc.text = self.doc.text[:self.CHAR_LIMIT]
-            self._previous_text = self.doc.text
+        if self.previous_text != self.text:
+            self.text = self.text[:CHAR_LIMIT]
+            self.previous_text = self.text
 
     def on_focus(self, *args):
-        if not self._previous_state:
-            self._previous_state = self.doc.text
+        if not self.previous_state:
+            self.previous_state = self.text
 
-        self._ui_manager.enable()
+        self.ui_manager.enable()
         self._active = True
         self.trigger_full_render()
         self.caret.on_activate()
-        self.caret.position = len(self.doc.text)
-        self._edit_button.visible = False
-        self._background.set_texture(self.TextureTypeList.DOWN.value)
+        self.caret.position = len(self.text)
+        self.edit_button.visible = False
+        self.background.set_texture(self.TextureTypeList.DOWN.value)
 
     def on_blur(self, *args):
-        self._ui_manager.disable()
-        self._edit_button.visible = True
-        self._background.set_texture(self.TextureTypeList.DEFAULT.value)
+        self.ui_manager.disable()
+        self.edit_button.visible = True
+        self.background.set_texture(self.TextureTypeList.DEFAULT.value)
 
     def flush(self):
-        self._previous_state = None
+        self.previous_state = None
 
     def stabilize(self):
-        if self._previous_state:
-            self.doc.text = self._previous_state
+        if self.previous_state:
+            self.text = self.previous_state
             self.trigger_full_render()
