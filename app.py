@@ -2,4 +2,5 @@ from flabbergast import Flabbergast
 
 if __name__ == "__main__":
     game = Flabbergast()
-    game.launch()
+    game.setup()
+    game.run()
