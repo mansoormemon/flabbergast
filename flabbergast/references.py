@@ -10,5 +10,10 @@ class SceneList(xarc.Reference):
     SPLASHSCREEN = 0
     MAINMENU = 1
     SETTINGSPANE = 2
-    PLATFORMER = 3
-    CUTSCENE = 4
+    SELECTMODEPANE = 3
+    PLATFORMER = 4
+    NONE = -1
+
+
+class CutSceneList(xarc.Reference):
+    OPENING = 0

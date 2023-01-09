@@ -3,10 +3,11 @@ from typing import Any, Dict
 import arcade_curtains as arc_curts
 
 from . import xarcade as xarc
-from .cutscene import CutScene
+from .cutscenes import OpeningCutScene
 from .mainmenu import MainMenu
 from .platformer import Platformer
-from .references import SceneList
+from .references import CutSceneList, SceneList
+from .selectmodepane import SelectModePane
 from .settingspane import SettingsPane
 from .splashscreen import SplashScreen
 from .userdata import User
@@ -29,8 +30,9 @@ class Flabbergast(xarc.Window):
             SceneList.SPLASHSCREEN: SplashScreen(),
             SceneList.MAINMENU: MainMenu(),
             SceneList.SETTINGSPANE: SettingsPane(),
+            SceneList.SELECTMODEPANE: SelectModePane(),
             SceneList.PLATFORMER: Platformer(),
-            SceneList.CUTSCENE: CutScene()
+            CutSceneList.OPENING: OpeningCutScene()
         })
 
     def setup(self):

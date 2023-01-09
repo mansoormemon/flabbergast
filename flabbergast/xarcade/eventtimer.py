@@ -1,4 +1,4 @@
-from typing import Callable, Dict, Iterable, Tuple
+from typing import Callable, Dict, Tuple
 
 SECONDS_IN_MINUTE: int = 60
 

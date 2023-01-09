@@ -1,3 +1,5 @@
+from typing import List
+
 import arcade as arc
 
 from flabbergast.assets import (
@@ -35,8 +37,7 @@ class AbstractOption(arc.Sprite):
     def hover(self, *_):
         self.scale = self.Scale.ON_HOVER
         note: arc.Sound = arc.Sound(asset(self.Response.NOTE))
-        note_player: arc.sound.media.Player = note.play()
-        note.set_volume(self.Response.VOLUME, note_player)
+        note.play(self.Response.VOLUME)
 
     def out(self, *_):
         self.scale = self.Scale.DEFAULT
@@ -70,7 +71,7 @@ class TextOption(AbstractOption):
 
 
 class ImageOption(AbstractOption):
-    def __init__(self, textures: list, *args, **kwargs):
+    def __init__(self, textures: List, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         for texture in textures:
@@ -96,7 +97,7 @@ class NavigationArrow(ImageOption):
     def __init__(self, direction: Direction, *args, scale: float = Scale.DEFAULT, **kwargs):
         self.direction = direction
 
-        texture_list: list = []
+        texture_list: List = []
         match direction:
             case self.Direction.DOWN:
                 texture_list += [WGT_DEFAULT_ARROWDOWN, WGT_DOWN_ARROWDOWN]

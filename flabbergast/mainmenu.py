@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Callable, Optional, Tuple
+from typing import Callable, List, Optional, Tuple
 
 import arcade as arc
 import arcade_curtains as arc_curts
@@ -40,7 +40,7 @@ class MenuOption(xarc.TextOption):
         selected_option: OptionList = OptionList[self.text.upper()]
         match selected_option:
             case OptionList.START:
-                context.curtains.set_scene(SceneList.CUTSCENE)
+                context.curtains.set_scene(SceneList.SELECTMODEPANE)
             case OptionList.SETTINGS:
                 context.curtains.set_scene(SceneList.SETTINGSPANE)
             case OptionList.QUIT:
@@ -104,7 +104,7 @@ class MainMenu(xarc.AbstractScene):
             fade_in_logo: arc_curts.Sequence = xarc.Animation.fade_in_with_delay(speed=xarc.Speed.DEFAULT)
             logo_animation: Tuple[arc.Sprite, arc_curts.Sequence] = (self.logo_game, fade_in_logo)
 
-            menu_opts_animation: list = [
+            menu_opts_animation: List[Tuple[MenuOption, arc_curts.Sequence]] = [
                 (
                     menu_opt, xarc.Animation.fade_in(speed=xarc.Speed.VERY_FAST,
                                                      callback=(menu_opt.connect, self))
@@ -129,8 +129,3 @@ class MainMenu(xarc.AbstractScene):
         self.mascot_corp.draw_scaled(MASCOT_CORP_X(), MASCOT_CORP_Y())
 
         super().draw()
-
-    def on_key_press(self, symbol: int, modifiers: int):
-        match symbol:
-            case arc.key.ESCAPE:
-                self.curtains.set_scene(SceneList.SPLASHSCREEN)

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any, Callable, List
+
 import arcade as arc
 
 from . import xarcade as xarc
@@ -41,9 +43,8 @@ class _AvatarNavigationArrow(xarc.NavigationArrow):
         context.events.click(self, lambda *args_: self.click(context, parent, *args_))
 
 
-class C:
-    ARROW_LEFT_X: float = lambda: xarc.Meta.screen_width() * 0.35
-    ARROW_RIGHT_X: float = lambda: xarc.Meta.screen_width() * 0.65
+ARROW_LEFT_X: Callable = lambda: xarc.Meta.screen_width() * 0.35
+ARROW_RIGHT_X: Callable = lambda: xarc.Meta.screen_width() * 0.65
 
 
 class Avatar(arc.SpriteList):
@@ -54,12 +55,12 @@ class Avatar(arc.SpriteList):
         BACK: int = -1
         FORWARD: int = 1
 
-    def __init__(self, center_x, center_y, *args, **kwargs):
+    def __init__(self, center_x: float, center_y: float, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.team: xarc.AtomicData = xarc.AtomicData(User.get_team())
 
-        self.mascots: list = []
+        self.mascots: List = []
         for mascot in MascotList:
             texture_path: str = asset(f"images/teams/{mascot.as_key()}/mascot.png")
             self.mascots.append(arc.load_texture(texture_path))
@@ -69,17 +70,17 @@ class Avatar(arc.SpriteList):
                                  center_y=center_y)
         self.append(self.ring)
 
-        self.avatar_arrow_left = _AvatarNavigationArrow(xarc.NavigationArrow.Direction.LEFT,
-                                                        center_x=C.ARROW_LEFT_X(),
-                                                        center_y=center_y)
+        self.avatar_arrow_left: _AvatarNavigationArrow = _AvatarNavigationArrow(xarc.NavigationArrow.Direction.LEFT,
+                                                                                center_x=ARROW_LEFT_X(),
+                                                                                center_y=center_y)
         self.append(self.avatar_arrow_left)
 
-        self.avatar_arrow_right = _AvatarNavigationArrow(xarc.NavigationArrow.Direction.RIGHT,
-                                                         center_x=C.ARROW_RIGHT_X(),
-                                                         center_y=center_y)
+        self.avatar_arrow_right: _AvatarNavigationArrow = _AvatarNavigationArrow(xarc.NavigationArrow.Direction.RIGHT,
+                                                                                 center_x=ARROW_RIGHT_X(),
+                                                                                 center_y=center_y)
         self.append(self.avatar_arrow_right)
 
-    def draw(self, *args, filter_=None, pixelated=None, blend_function=None):
+    def draw(self, *args, filter_: Any = None, pixelated: Any = None, blend_function: Any = None):
         self.mascots[self.team.data].draw_scaled(self.ring.center_x, self.ring.center_y,
                                                  self.Scale.DEFAULT - self.Scale.DELTA)
 

@@ -1,2 +1,2 @@
-from . import vmath
 from . import mapgenerator
+from . import vmath

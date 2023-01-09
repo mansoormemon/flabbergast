@@ -1,9 +1,10 @@
 from enum import Enum
-from typing import Tuple
+from typing import Optional, Tuple
 
 import arcade as arc
 import arcade.gui as arc_gui
 
+from ..abstractscene import AbstractScene
 from ..options import TooltipOption
 from ...assets import (
     ICON_DEFAULT_EDITPENCIL,
@@ -33,7 +34,12 @@ class InputBox(arc_gui.UIInputText):
         DELTA = 0.08
         DEFAULT = 0.55
 
-    def __init__(self, text, ui_manager, widget_list, center_x, center_y):
+    def __init__(self,
+                 text: str,
+                 ui_manager: arc_gui.UIManager,
+                 widget_list: arc.SpriteList,
+                 center_x: float,
+                 center_y: float):
         self.ui_manager: arc_gui.UIManager = ui_manager
 
         self.widget_list: arc.SpriteList = widget_list
@@ -65,16 +71,16 @@ class InputBox(arc_gui.UIInputText):
                          font_name=FONT_NAME,
                          font_size=FONT_SIZE)
 
-        self.previous_active_state = False
-        self.previous_text = self.text
+        self.previous_active_state: bool = False
+        self.previous_text: str = self.text
 
-        self.previous_state = None
+        self.previous_state: Optional[str] = None
 
-    def connect(self, context):
+    def connect(self, context: AbstractScene):
         self.edit_button.connect(context)
         context.events.click(self.edit_button, self.on_focus)
 
-    def on_update(self, delta_time):
+    def on_update(self, delta_time: float):
         if self.previous_active_state != self._active:
             if not self._active:
                 self.on_blur()
@@ -96,7 +102,7 @@ class InputBox(arc_gui.UIInputText):
         self.edit_button.visible = False
         self.background.set_texture(self.TextureTypeList.DOWN.value)
 
-    def on_blur(self, *args):
+    def on_blur(self):
         self.ui_manager.disable()
         self.edit_button.visible = True
         self.background.set_texture(self.TextureTypeList.DEFAULT.value)

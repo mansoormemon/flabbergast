@@ -5,10 +5,12 @@ import arcade as arc
 from . import xarcade as xarc
 from .assets import (
     AUDIO_KEYBOARDTYPING,
-    LOGO_GAME,
+    LOGO_GAME
 )
 from .assets import asset
 from .references import SceneList
+
+TIME_SPAN: Tuple[int, int] = (0, 4)
 
 FONT_COLOR: Tuple[int, int, int] = arc.color.WHITE_SMOKE
 FONT_NAME: str = "Tekton Display Ssi"
@@ -16,8 +18,6 @@ FONT_SIZE: int = 8
 
 TAG_COPYRIGHT: str = "© NightStalker Corp. 2023"
 TAG_COPYRIGHT_Y: int = 64
-
-TIME_SPAN: Tuple[int, int] = (0, 4)
 
 
 class SplashScreen(xarc.AbstractScene):

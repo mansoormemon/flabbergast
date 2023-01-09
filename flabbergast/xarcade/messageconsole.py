@@ -1,4 +1,4 @@
-from typing import Callable, Dict, Iterable, Optional, Tuple
+from typing import Any, Callable, Dict, Iterable, Optional, Tuple
 
 import arcade as arc
 
@@ -66,7 +66,7 @@ class MessageConsole(arc.SpriteList):
             self.active_notification = None
             self.timer.reset()
 
-    def draw(self, *, filter_=None, pixelated=None, blend_function=None):
+    def draw(self, *, filter_: Any = None, pixelated: Any = None, blend_function: Any = None):
         if self.active_notification is not None:
             self.active_notification.draw()
 

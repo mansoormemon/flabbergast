@@ -1,13 +1,13 @@
+from typing import Any, Dict, List, Tuple
+
 import numpy as np
 
+N, S, E, W = 1, 2, 4, 8
 
-class Direction:
-    N, S, E, W = 1, 2, 4, 8
+DX: Dict[int, int] = {E: 1, W: -1, N: 0, S: 0}
+DY: Dict[int, int] = {E: 0, W: 0, N: -1, S: 1}
 
-    DX = {E: 1, W: -1, N: 0, S: 0}
-    DY = {E: 0, W: 0, N: -1, S: 1}
-
-    OPPOSITE = {E: W, W: E, N: S, S: N}
+OPPOSITE: Dict[int, int] = {E: W, W: E, N: S, S: N}
 
 
 class DisjointSet:
@@ -17,7 +17,7 @@ class DisjointSet:
             self.parent = parent
 
     def __init__(self, nodes):
-        self._node_map = {}
+        self._node_map: Dict = {}
 
         for i, value in enumerate(nodes):
             n = DisjointSet.Node(value, i)
@@ -44,43 +44,41 @@ class DisjointSet:
 class Maze:
     class Kruskal:
         @staticmethod
-        def generate(grid_shape, seed=0):
-            def neighbor(r, c, direction):
-                return r + Direction.DY[direction], c + Direction.DX[direction]
+        def generate(grid_shape: Tuple[int, int], seed: int = 0) -> np.ndarray:
+            def neighbor(r: int, c: int, direction: int) -> Tuple[int, int]:
+                return r + DY[direction], c + DX[direction]
 
-            def compute_maze_shape(rows, cols):
+            def compute_maze_shape(rows: int, cols: int) -> Tuple[int, int]:
                 return rows * 2 + 1, cols * 2 + 1
 
             np.random.seed(seed)
 
             rows, cols = grid_shape
 
-            nodes = [(r, c) for r in range(rows) for c in range(cols)]
+            nodes: List[Tuple[int, int]] = [(r, c) for r in range(int(rows)) for c in range(int(cols))]
 
-            disjoint_set = DisjointSet(nodes)
+            disjoint_set: DisjointSet = DisjointSet(nodes)
 
-            internal_edges = []
+            internal_edges: List[Tuple[Tuple[int, int], Tuple[int, int]]] = []
             for r, c in nodes:
                 if r:
-                    internal_edges.append((neighbor(r, c, Direction.N), (r, c)))
+                    internal_edges.append((neighbor(r, c, N), (r, c)))
                 if c:
-                    internal_edges.append((neighbor(r, c, Direction.W), (r, c)))
+                    internal_edges.append((neighbor(r, c, W), (r, c)))
 
-            maze = []
+            maze: List[Tuple[Tuple[int, int], Tuple[int, int]]] = []
             for edge in sorted(internal_edges, key=lambda _: np.random.random()):
                 node_a, node_b = edge
                 if disjoint_set.find_parent(node_a) != disjoint_set.find_parent(node_b):
                     disjoint_set.union(node_a, node_b)
                     maze.append(edge)
 
-            maze_shape = compute_maze_shape(rows, cols)
-            maze_map = np.zeros(maze_shape, dtype=np.uint8)
+            maze_shape: Tuple[int, int] = compute_maze_shape(rows, cols)
+            maze_map: np.ndarray = np.zeros(maze_shape, dtype=np.uint8)
             for edge in maze:
                 (a_r, a_c), (b_r, b_c) = edge
-                min_x = min(a_r, b_r) * 2 + 1
-                max_x = max(a_r, b_r) * 2 + 1
-                min_y = min(a_c, b_c) * 2 + 1
-                max_y = max(a_c, b_c) * 2 + 1
+                min_x, min_y = compute_maze_shape(min(a_r, b_r), min(a_c, b_c))
+                max_x, max_y = compute_maze_shape(max(a_r, b_r), max(a_c, b_c))
                 maze_map[min_x: max_x + 1, min_y: max_y + 1] = 1
 
             return maze_map
@@ -88,5 +86,5 @@ class Maze:
 
 class Map:
     @staticmethod
-    def generate(shape, generator=Maze.Kruskal, seed=0):
+    def generate(shape: Tuple[int, int], generator: Any = Maze.Kruskal, seed: int = 0) -> np.ndarray:
         return generator.generate(shape, seed)
