@@ -27,6 +27,7 @@ class SplashScreen(xarc.AbstractScene):
         self.sound_player: Optional[arc.sound.media.Player] = None
         self.logo_game: Optional[arc.Texture] = None
         self.tag_copyright: Optional[arc.Text] = None
+        self.alpha = None
 
         super().__init__(SceneList.SPLASHSCREEN, *args, **kwargs)
 
@@ -46,6 +47,8 @@ class SplashScreen(xarc.AbstractScene):
                                       font_size=FONT_SIZE,
                                       anchor_x="center", anchor_y="center")
 
+        self.alpha = 0
+
     def enter_scene(self, previous_scene: xarc.AbstractScene):
         self.sound_player = self.sound.play()
 
@@ -54,10 +57,12 @@ class SplashScreen(xarc.AbstractScene):
         self.timer.reset()
 
     def draw(self):
-        self.logo_game.draw_scaled(xarc.Meta.hz_screen_center(), xarc.Meta.vt_screen_center())
+        self.logo_game.draw_scaled(xarc.Meta.hz_screen_center(), xarc.Meta.vt_screen_center(), alpha=self.alpha)
         self.tag_copyright.draw()
 
         super().draw()
 
     def on_update(self, delta_time: float):
+        if self.alpha < xarc.Alpha.VISIBLE:
+            self.alpha = min(self.alpha + xarc.Speed.VERY_SLOW, xarc.Alpha.VISIBLE)
         self.timer.tick(delta_time)

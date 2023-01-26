@@ -1,4 +1,6 @@
-from typing import Any, Dict, List, Tuple
+from __future__ import annotations
+
+from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
 
@@ -10,28 +12,29 @@ DY: Dict[int, int] = {E: 0, W: 0, N: -1, S: 1}
 OPPOSITE: Dict[int, int] = {E: W, W: E, N: S, S: N}
 
 
-class DisjointSet:
-    class Node:
-        def __init__(self, value, parent):
-            self.value = value
-            self.parent = parent
+class Node:
+    def __init__(self, value, parent):
+        self.value: Tuple[int, int] = value
+        self.parent: Union[int, Node] = parent
 
+
+class DisjointSet:
     def __init__(self, nodes):
-        self._node_map: Dict = {}
+        self.node_map: Dict[Tuple[int, int], Node] = {}
 
         for i, value in enumerate(nodes):
-            n = DisjointSet.Node(value, i)
-            self._node_map[value] = n
+            n: Node = Node(value, i)
+            self.node_map[value] = n
 
-    def find_parent(self, node):
+    def find_parent(self, node) -> Union[int, Node]:
         return self.find_node(node).parent
 
-    def find_node(self, node):
-        if type(self._node_map[node].parent) is int:
-            return self._node_map[node]
+    def find_node(self, node) -> Node:
+        if type(self.node_map[node].parent) is int:
+            return self.node_map[node]
         else:
-            parent_node = self.find_node(self._node_map[node].parent.value)
-            self._node_map[node].parent = parent_node
+            parent_node: Node = self.find_node(self.node_map[node].parent.value)
+            self.node_map[node].parent = parent_node
             return parent_node
 
     def union(self, node_a, node_b):

@@ -1,38 +1,34 @@
-from enum import Enum
-
 import arcade as arc
 
-from . import xarcade as xarc
+
+class Direction:
+    UP = 1
+    DOWN = 2
+    LEFT = 4
+    RIGHT = 8
 
 
-class Player(arc.SpriteCircle):
-    class TextureTypeList(Enum):
-        pass
+class Player(arc.SpriteSolidColor):
+    def __init__(self, grid, spawn_point, *args, **kwargs):
+        super().__init__(64, 64, arc.color.RED, *args, **kwargs)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(5, arc.color.BLUE, *args, **kwargs)
+        self.speed = 3
+        self.center_x, self.center_y = spawn_point
+        self.scale = grid.scale
 
-        self.center_x = xarc.Meta.hz_screen_center()
-        self.center_y = xarc.Meta.vt_screen_center()
+    # def update(self):
+    #     self.center_x += self.c
+    #     self.center_y += self.delta_y
+    #     print(self.center_x, self.center_y)
 
-    def start_moving(self, *args):
-        pass
+    def move_up(self):
+        self.change_y = self.speed
 
-    def stop_moving(self, *args):
-        pass
+    def move_down(self):
+        self.change_y = -self.speed
 
-    def move_up(self, *args):
-        print("up")
-        self.center_y += 10
+    def move_right(self):
+        self.change_x = self.speed
 
-    def move_down(self, *args):
-        print("down")
-        self.center_y -= 10
-
-    def move_left(self, *args):
-        print("left")
-        self.center_x -= 10
-
-    def move_right(self, *args):
-        print("right")
-        self.center_x += 10
+    def move_left(self):
+        self.change_x = -self.speed
