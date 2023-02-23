@@ -31,11 +31,10 @@ class _Ring(xarc.ImageOption):
 class _AvatarNavigationArrow(xarc.NavigationArrow):
     def click(self, context: xarc.AbstractScene, *args):
         parent, *_ = args
-        match self.direction:
-            case self.Direction.LEFT:
-                parent.change_mascot(parent.Step.BACK)
-            case self.Direction.RIGHT:
-                parent.change_mascot(parent.Step.FORWARD)
+        if self.direction == self.Direction.LEFT:
+            parent.change_mascot(parent.Step.BACK)
+        elif self.direction == self.Direction.RIGHT:
+            parent.change_mascot(parent.Step.FORWARD)
 
     def connect(self, context: xarc.AbstractScene, *args):
         super().connect(context)

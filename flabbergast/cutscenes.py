@@ -6,7 +6,6 @@ import arcade as arc
 from . import xarcade as xarc
 from .assets import (
     AUDIO_THEREISAPATTERN,
-    BACKGROUND_ARBITRARY_3,
     CUTSCENE_OPENING
 )
 from .assets import asset
@@ -35,7 +34,7 @@ FOOTNOTES_FONT_SIZE: int = 8
 class _Parser:
     @staticmethod
     def parse(file: str) -> Tuple[str, str, str, str]:
-        file = asset(CUTSCENE_OPENING)
+        file = asset(file)
         with open(file) as f:
             data = json.load(f)
             title = data["title"]
@@ -140,8 +139,7 @@ class OpeningCutScene(CutScene):
         super().draw()
 
     def on_key_press(self, symbol: int, modifiers: int):
-        match symbol:
-            case arc.key.ESCAPE:
-                self.curtains.set_scene(SceneList.MAINMENU)
-            case _:
-                self.curtains.set_scene(SceneList.PLATFORMER)
+        if symbol == arc.key.ESCAPE:
+            self.curtains.set_scene(SceneList.MAINMENU)
+        else:
+            self.curtains.set_scene(SceneList.PLATFORMER)

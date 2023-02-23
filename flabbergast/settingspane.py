@@ -34,19 +34,18 @@ class SettingsPane(ControlsPane):
     class ControlOption(ControlsPane.ControlOption):
         def click(self, context: SettingsPane, *args):
             selected_option: context.ControlOptionList = context.ControlOptionList[self.text.upper()]
-            match selected_option:
-                case context.ControlOptionList.BACK:
-                    context.curtains.set_scene(SceneList.MAINMENU)
-                case context.ControlOptionList.SAVE:
-                    User.set_team(context.avatar.team.data)
-                    User.set_name(context.player_name_box.text)
-                    context.avatar.flush()
-                    context.player_name_box.flush()
-                    User.save()
-                    note: arc.Sound = arc.Sound(asset(AUDIO_POSITIVEINTERFACEBEEP))
-                    note_player: arc.sound.media.Player = note.play()
-                    note.set_volume(self.Response.VOLUME, note_player)
-                    context.console.trigger_notification(ConsoleNotificationList.SAVED)
+            if selected_option == context.ControlOptionList.BACK:
+                context.curtains.set_scene(SceneList.MAINMENU)
+            if selected_option == context.ControlOptionList.SAVE:
+                User.set_team(context.avatar.team.data)
+                User.set_name(context.player_name_box.text)
+                context.avatar.flush()
+                context.player_name_box.flush()
+                User.save()
+                note: arc.Sound = arc.Sound(asset(AUDIO_POSITIVEINTERFACEBEEP))
+                note_player: arc.sound.media.Player = note.play()
+                note.set_volume(self.Response.VOLUME, note_player)
+                context.console.trigger_notification(ConsoleNotificationList.SAVED)
 
     def __init__(self, *args, **kwargs):
         self.console: Optional[xarc.MessageConsole] = None
@@ -94,9 +93,8 @@ class SettingsPane(ControlsPane):
         self.ui_manager.draw()
 
     def on_key_press(self, symbol: int, modifiers: int):
-        match symbol:
-            case arc.key.ESCAPE:
-                self.curtains.set_scene(SceneList.MAINMENU)
+        if symbol == arc.key.ESCAPE:
+            self.curtains.set_scene(SceneList.MAINMENU)
 
     def on_update(self, delta_time: float):
         self.console.on_update(delta_time)

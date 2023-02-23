@@ -98,15 +98,14 @@ class NavigationArrow(ImageOption):
         self.direction = direction
 
         texture_list: List = []
-        match direction:
-            case self.Direction.DOWN:
+        if direction == self.Direction.DOWN:
                 texture_list += [WGT_DEFAULT_ARROWDOWN, WGT_DOWN_ARROWDOWN]
-            case self.Direction.LEFT:
-                texture_list += [WGT_DEFAULT_ARROWLEFT, WGT_DOWN_ARROWLEFT]
-            case self.Direction.RIGHT:
-                texture_list += [WGT_DEFAULT_ARROWRIGHT, WGT_DOWN_ARROWRIGHT]
-            case self.Direction.UP:
-                texture_list += [WGT_DEFAULT_ARROWUP, WGT_DOWN_ARROWUP]
+        elif direction == self.Direction.LEFT:
+            texture_list += [WGT_DEFAULT_ARROWLEFT, WGT_DOWN_ARROWLEFT]
+        elif direction == self.Direction.RIGHT:
+            texture_list += [WGT_DEFAULT_ARROWRIGHT, WGT_DOWN_ARROWRIGHT]
+        elif direction == self.Direction.UP:
+            texture_list += [WGT_DEFAULT_ARROWUP, WGT_DOWN_ARROWUP]
 
         super().__init__(texture_list, *args, scale=scale, **kwargs)
 

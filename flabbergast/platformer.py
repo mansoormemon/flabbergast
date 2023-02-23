@@ -86,15 +86,14 @@ class Platformer(xarc.AbstractScene):
                 center_x: float = (x * scaled_tile_size) + x_offset
                 center_y: float = (y * scaled_tile_size) + y_offset
                 block: arc.Sprite
-                match col:
-                    case self.BlockType.WALL:
-                        texture: str = asset("images/textures/floortexture8.png")
-                        block = arc.Sprite(texture, self.complexity)
-                        self.walls.append(block)
-                    case self.BlockType.PATH:
-                        texture: str = asset("images/textures/floortexture31.png")
-                        block = arc.Sprite(texture, self.complexity)
-                        self.path.append(block)
+                if col == self.BlockType.WALL:
+                    texture: str = asset("images/textures/floortexture8.png")
+                    block = arc.Sprite(texture, self.complexity)
+                    self.walls.append(block)
+                elif col == self.BlockType.PATH:
+                    texture: str = asset("images/textures/floortexture31.png")
+                    block = arc.Sprite(texture, self.complexity)
+                    self.path.append(block)
                 block.center_x, block.center_y = center_x, center_y
 
         self.grid = Grid(self)
@@ -119,7 +118,7 @@ class Platformer(xarc.AbstractScene):
 
     def draw(self):
         super().draw()
-        
+
         rows, cols = self.maze_map.shape
         for r in range(rows):
             for c in range(cols):
@@ -131,27 +130,25 @@ class Platformer(xarc.AbstractScene):
         self.sprites.update()
 
     def on_key_press(self, symbol: int, modifiers: int):
-        match symbol:
-            case arc.key.ESCAPE:
-                self.curtains.set_scene(SceneList.MAINMENU)
-            case arc.key.UP:
-                self.player1.move_up()
-                self.player2.move_up()
-            case arc.key.DOWN:
-                self.player1.move_down()
-                self.player2.move_down()
-            case arc.key.RIGHT:
-                self.player1.move_right()
-                self.player2.move_right()
-            case arc.key.LEFT:
-                self.player1.move_left()
-                self.player2.move_left()
+        if symbol == arc.key.ESCAPE:
+            self.curtains.set_scene(SceneList.MAINMENU)
+        elif symbol == arc.key.UP:
+            self.player1.move_up()
+            self.player2.move_up()
+        elif symbol == arc.key.DOWN:
+            self.player1.move_down()
+            self.player2.move_down()
+        elif symbol == arc.key.RIGHT:
+            self.player1.move_right()
+            self.player2.move_right()
+        elif symbol == arc.key.LEFT:
+            self.player1.move_left()
+            self.player2.move_left()
 
     def on_key_release(self, symbol: int, modifiers: int):
-        match symbol:
-            case arc.key.UP | arc.key.DOWN:
-                self.player1.change_y = 0
-                self.player2.change_y = 0
-            case arc.key.RIGHT | arc.key.LEFT:
-                self.player1.change_x = 0
-                self.player2.change_x = 0
+        if symbol == arc.key.UP or symbol == arc.key.DOWN:
+            self.player1.change_y = 0
+            self.player2.change_y = 0
+        elif symbol == arc.key.RIGHT or symbol == arc.key.LEFT:
+            self.player1.change_x = 0
+            self.player2.change_x = 0

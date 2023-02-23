@@ -52,7 +52,7 @@ class Animation:
         return impl
 
     @staticmethod
-    @animationsequence
+    @animationsequence.__get__(object)
     def fade_in() -> arc_curts.Sequence:
         return [
             (arc_curts.KeyFrame(alpha=Alpha.INVISIBLE), Delay.SHORT),
@@ -60,7 +60,7 @@ class Animation:
         ]
 
     @staticmethod
-    @animationsequence
+    @animationsequence.__get__(object)
     def fade_in_with_delay() -> arc_curts.Sequence:
         return [
             (arc_curts.KeyFrame(alpha=Alpha.INVISIBLE), Delay.SHORT),
@@ -69,7 +69,7 @@ class Animation:
         ]
 
     @staticmethod
-    @animationsequence
+    @animationsequence.__get__(object)
     def inflate(begin_scale: float = Scale.UNITY, end_scale: float = Scale.UNITY + Scale.DELTA) -> arc_curts.Sequence:
         return [
             (arc_curts.KeyFrame(scale=begin_scale), Delay.SHORT),
@@ -77,7 +77,7 @@ class Animation:
         ]
 
     @staticmethod
-    @animationsequence
+    @animationsequence.__get__(object)
     def deflate(begin_scale: float = Scale.UNITY + Scale.DELTA, end_scale: float = Scale.UNITY) -> arc_curts.Sequence:
         return [
             (arc_curts.KeyFrame(scale=begin_scale), Delay.SHORT),
@@ -85,7 +85,7 @@ class Animation:
         ]
 
     @staticmethod
-    @animationsequence
+    @animationsequence.__get__(object)
     def peek_from_bottom(x: float, y: float) -> arc_curts.Sequence:
         return [
             (arc_curts.KeyFrame(position=(x, -y)), Delay.VERY_SHORT),

@@ -38,13 +38,12 @@ class MenuOption(xarc.TextOption):
 
     def click(self, context: MainMenu, *_):
         selected_option: OptionList = OptionList[self.text.upper()]
-        match selected_option:
-            case OptionList.START:
-                context.curtains.set_scene(SceneList.SELECTMODEPANE)
-            case OptionList.SETTINGS:
-                context.curtains.set_scene(SceneList.SETTINGSPANE)
-            case OptionList.QUIT:
-                arc.exit()
+        if selected_option == OptionList.START:
+            context.curtains.set_scene(SceneList.SELECTMODEPANE)
+        elif selected_option == OptionList.SETTINGS:
+            context.curtains.set_scene(SceneList.SETTINGSPANE)
+        elif selected_option == OptionList.QUIT:
+            arc.exit()
 
     def connect(self, context: MainMenu, *_):
         super().connect(context)

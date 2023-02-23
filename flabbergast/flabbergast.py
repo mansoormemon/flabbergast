@@ -36,4 +36,4 @@ class Flabbergast(xarc.Window):
         })
 
     def setup(self):
-        self.curtains.set_scene(SceneList.PLATFORMER)
+        self.curtains.set_scene(SceneList.SPLASHSCREEN)

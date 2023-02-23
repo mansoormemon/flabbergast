@@ -35,7 +35,7 @@ class Meta:
         return arc.get_window().height
 
     @staticmethod
-    def screen_size() -> tuple[int, int]:
+    def screen_size() -> tuple:
         return arc.get_window().get_size()
 
     @classmethod
@@ -47,5 +47,5 @@ class Meta:
         return cls.screen_height() / 2
 
     @classmethod
-    def screen_center(cls) -> tuple[float, float]:
+    def screen_center(cls) -> tuple:
         return cls.hz_screen_center(), cls.vt_screen_center()

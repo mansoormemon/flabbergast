@@ -45,11 +45,10 @@ class ModeOption(xarc.AbstractOption):
         self.set_texture(self.TextureTypeList.DEFAULT.value)
 
     def click(self, context: SelectModePane, *_):
-        match self.reference:
-            case ModeList.STORY:
-                context.curtains.set_scene(CutSceneList.OPENING)
-            case ModeList.ENDLESS:
-                context.curtains.set_scene(SceneList.PLATFORMER)
+        if self.reference == ModeList.STORY:
+            context.curtains.set_scene(CutSceneList.OPENING)
+        elif self.reference == ModeList.ENDLESS:
+            context.curtains.set_scene(SceneList.PLATFORMER)
 
     def connect(self, context: SelectModePane, *_):
         super().connect(context)
@@ -63,9 +62,8 @@ class SelectModePane(ControlsPane):
     class ControlOption(ControlsPane.ControlOption):
         def click(self, context: SelectModePane, *args):
             selected_option: context.ControlOptionList = context.ControlOptionList[self.text.upper()]
-            match selected_option:
-                case context.ControlOptionList.BACK:
-                    context.curtains.set_scene(SceneList.MAINMENU)
+            if selected_option == context.ControlOptionList.BACK:
+                context.curtains.set_scene(SceneList.MAINMENU)
 
     def __init__(self, *args, **kwargs):
         self.mode_opts: Optional[arc.SpriteList] = None
@@ -88,6 +86,5 @@ class SelectModePane(ControlsPane):
             self.mode_opts.append(mode_opt)
 
     def on_key_press(self, symbol: int, modifiers: int):
-        match symbol:
-            case arc.key.ESCAPE:
-                self.curtains.set_scene(SceneList.MAINMENU)
+        if symbol == arc.key.ESCAPE:
+            self.curtains.set_scene(SceneList.MAINMENU)
