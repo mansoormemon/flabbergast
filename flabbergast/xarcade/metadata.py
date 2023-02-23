@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import arcade as arc
 
 
@@ -35,7 +37,7 @@ class Meta:
         return arc.get_window().height
 
     @staticmethod
-    def screen_size() -> tuple:
+    def screen_size() -> Tuple[int, int]:
         return arc.get_window().get_size()
 
     @classmethod
@@ -47,5 +49,5 @@ class Meta:
         return cls.screen_height() / 2
 
     @classmethod
-    def screen_center(cls) -> tuple:
+    def screen_center(cls) -> Tuple[float, float]:
         return cls.hz_screen_center(), cls.vt_screen_center()
